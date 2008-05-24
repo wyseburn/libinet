@@ -26,21 +26,22 @@
 
 namespace INet
 {
-    static const uint32_t sMsgHdrLen = 8; // sizeof(MsgHdr)
     struct MsgHdr
     {
-        uint32_t mId;              
-        uint32_t mLength; 
-        MsgHdr(uint32_t id = 0) : mId(id), mLength(sMsgHdrLen) {}
+        static const uint32_t sSize = 4; // sizeof(MsgHdr)
+        uint32_t mId;                    // Message handler ID   
+        uint32_t mLength;                // Message length include header lenght. 
+        MsgHdr(uint32_t id = 0) : mId(id), mLength(sSize) {}
     };
 
-    class Message 
+    class Message  // Support max message length is 64k
     {
     public:
+        static const uint32_t sMaxSize = 1024 * 64;
         Message(uint32_t bodyLen = 200) 
-            : mInPos(sMsgHdrLen), mOutPos(sMsgHdrLen), mGCFlag(true) 
+            : mInPos(MsgHdr::sSize), mOutPos(MsgHdr::sSize), mGCFlag(true) 
         {
-            mSize = sMsgHdrLen + bodyLen;
+            mSize = MsgHdr::sSize + bodyLen;
             mData = (uint8_t *)malloc(mSize);
             assert(mData);
 
@@ -48,9 +49,9 @@ namespace INet
         }
 
         Message(uint32_t id, uint32_t bodyLen = 200)
-            : mInPos(sMsgHdrLen), mOutPos(sMsgHdrLen), mGCFlag(true) 
+            : mInPos(MsgHdr::sSize), mOutPos(MsgHdr::sSize), mGCFlag(true) 
         {
-            mSize = sMsgHdrLen + bodyLen;
+            mSize = MsgHdr::sSize + bodyLen;
             mData = (uint8_t *)malloc(mSize);
             assert(mData);
 
@@ -110,8 +111,7 @@ namespace INet
         }
 
         Message& operator << (int8_t value) 
-        { 
-            append<int8_t>((int8_t)value); 
+        { append<int8_t>((int8_t)value); 
             return *this; 
         }
 

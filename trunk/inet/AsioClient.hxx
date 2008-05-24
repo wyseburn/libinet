@@ -24,14 +24,28 @@
 #define __INET_ASIO_CLIENT_H__
 
 #include "Client.h"
+#include "AsioService.h"
 
 namespace INet
 {
+    class AsioClientImpl;
     class AsioClient : Client 
     {
+    public:
+        AsioClient(AsioService& service);
+        virtual ~AsioClient() {}
 
-
+        virtual void update();
+        virtual void connect(const int8_t* host, uint16_t port, bool ssl = false);
+        virtual void close();
+        virtual void pause();
+        virtual void resume();
+        virtual void send(msg& msg, bool closed = false);
+        virtual void sentto(const int8_t* ip, uint16_t port, msg& msg);
+    private:
+        AsioClientImpl* mImpl;
     };
 }
 
 #endif // #ifndef __INET_ASIO_CLIENT_H__
+

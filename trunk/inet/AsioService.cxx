@@ -41,6 +41,7 @@ INet::AsioService::~AsioService()
     delete mImpl;
 }
 
+void*
 INet::AsioService::get()
 {
     assert(mImpl);

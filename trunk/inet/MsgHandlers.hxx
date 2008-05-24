@@ -27,7 +27,7 @@
 
 namespace INet 
 {
-    typedef Delegate<void (Message* void*)> MsgHandler;
+    typedef Delegate<void (const Message& void*)> MsgHandler;
     static const int sMsgHandlerMaxIndex = 1024;
 
     class MsgHandlers
@@ -74,19 +74,21 @@ namespace INet
             return NULL; 
         } 
 
-        void getHandler(int32_t id)
+        MsgHandler* getHandler(int32_t id)
         {
             assert(id < sMsgHandlerMaxIndex);
             if (mHandlers[id] == NULL) return mDefaultHandler;
             return mHandlers[id];
         }
 
-        void handleMsg(Message* msg, void* state)
+        bool handleMsg(const Message& msg, void* args)
         {
             assert(msg);
-            MsgHandler* handler = getHandler(msg->getId());
-            if (!handler || handler->IsEmpty()) return;
-            handler->operator () (msg, state);
+            MsgHandler* handler = getHandler(msg.getId());
+            if (!handler || handler->IsEmpty()) 
+                return false;
+            handler->operator () (msg, args);
+            return true;
         }
 
     private:

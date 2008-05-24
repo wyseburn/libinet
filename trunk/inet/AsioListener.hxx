@@ -24,6 +24,7 @@
 #define __INET_ASIO_LISTENER_H__
 
 #include "Listener.hxx"
+#include "AsioService.hxx"
 
 namespace INet
 {
@@ -31,7 +32,7 @@ namespace INet
     class AsioListener : Listener
     {
     public:
-        AsioListener() {}
+        AsioListener(AsioService& service) {}
         virtual ~AsioListener() {}
         
         virtual bool create(uint16_t port, const int8_t* ip = 0); 
@@ -40,6 +41,7 @@ namespace INet
         virtual void update();
         virtual void close();
 
+    private:
         AsioListenerImpl* mImpl;
     };
 } // namespace

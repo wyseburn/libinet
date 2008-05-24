@@ -45,9 +45,9 @@ namespace INet
         virtual void send(msg& msg, bool closed = false) = 0;
         virtual void sentto(const int8_t* ip, uint16_t port, msg& msg) = 0;
         
-        EventCallback mConnected;
-        EventCallback mConnectFailed;
-        EventCallback mConnectLost;
+        EventCallback mOnConnected;
+        EventCallback mOnConnectFailed;
+        EventCallback mOnConnectLost;
 
     protected:
         MsgHandlers mHandlers;
