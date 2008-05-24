@@ -23,11 +23,9 @@
 #ifndef __INET_ASIO_CLIENT_H__
 #define __INET_ASIO_CLIENT_H__
 
-#ifdef _WITH_BOOST_ASIO
-
 #include "Client.h"
 
-namespace INET
+namespace INet
 {
     class AsioClient : Client 
     {
@@ -35,7 +33,5 @@ namespace INET
 
     };
 }
-
-#endif // #ifndef _WITHOUT_BOOST_ASIO
 
 #endif // #ifndef __INET_ASIO_CLIENT_H__

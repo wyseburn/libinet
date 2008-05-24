@@ -27,7 +27,7 @@
 #include "Listener.hxx"
 #include "Time.hxx"
 
-namespace INET 
+namespace INet 
 {
     static Client* CreateClient();
     static void DestroyClient(Client* client);

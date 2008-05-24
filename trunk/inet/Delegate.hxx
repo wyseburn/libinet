@@ -50,7 +50,7 @@
 #define INET_MAKE_PARAMS1(n, t)         INET_JOIN(X_MAKE_PARAMS1_, n) (t)
 #define INET_MAKE_PARAMS2(n, t1, t2)    INET_JOIN(X_MAKE_PARAMS2_, n) (t1, t2)
 
-namespace INET 
+namespace INet 
 {
     class InvalidOperationException : public std::runtime_error
     {

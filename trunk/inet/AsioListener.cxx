@@ -20,11 +20,9 @@
  *  Boston, MA 02111-1307  USA
  */
 
-#ifdef _WITH_BOOST_ASIO
-
 #include "AsioListener.hxx"
 
-namespace INET
+namespace INet
 {
     class AsioListenerImpl
     {
@@ -64,9 +62,7 @@ namespace INET
 
 } // namespace
 
-using namespace INET;
-
-AsioListener::AsioListener(AsioService& service, uint16_t port) 
+INet::AsioListener::AsioListener(AsioService& service, uint16_t port) 
 {
     mImpl = new AsioListenerImpl(this, service, port);
 }
@@ -77,32 +73,30 @@ AsioListener::~AsioListener()
 }
 
 bool 
-AsioListener::create(uint16_t port, const int8_t* ip)
+INet::AsioListener::create(uint16_t port, const int8_t* ip)
 {
     assert(mImpl);
     mImpl->create(port, ip);
 }
 
 bool
-AsioListener::start(uint32_t backlog, bool ssl)
+INet::AsioListener::start(uint32_t backlog, bool ssl)
 {
     assert(mImpl); 
     mImpl->start(backlog, ssl);
 }
 
 void
-AsioListener::update()
+INet::AsioListener::update()
 {
     assert(mImpl);
     mImpl->update();
 }
 
 void
-AsioListener::close()
+INet::AsioListener::close()
 {
     assert(mImpl);
     mImpl->close();
 }
-
-#endif // #ifdef _WITH_BOOST_ASIO
 

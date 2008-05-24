@@ -22,7 +22,7 @@
 #ifndef __INET_TIMER_H__
 #define __INET_TIMER_H__
 
-namespace INET
+namespace INet
 {
     class Timer
     {

@@ -25,7 +25,7 @@
 #include "Event.hxx"
 #include "MsgHandlers.hxx"
 
-namespace INET 
+namespace INet
 {
     class Client
     {

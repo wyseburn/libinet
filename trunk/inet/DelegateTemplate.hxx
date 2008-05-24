@@ -40,7 +40,7 @@
 #define INET_DELEGATE_COMMA    ,
 #endif
 
-namespace INET 
+namespace INet
 {
     //-------------------------------------------------------------------------
     // class Delegate<R (T1, T2, ..., TN)>

@@ -24,7 +24,7 @@
 
 #include "Compat.hxx"
 
-namespace INET
+namespace INet
 {
     static const uint32_t sMsgHdrLen = 8; // sizeof(MsgHdr)
     struct MsgHdr

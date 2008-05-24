@@ -20,12 +20,8 @@
  *  Boston, MA 02111-1307  USA
  */
 
-#ifdef _WITH_BOOST_ASIO
-
 #include "AsioClient.h"
 
 
 
 
-
-#endif // #ifdef _WITH_BOOST_ASIO

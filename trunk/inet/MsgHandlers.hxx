@@ -25,7 +25,7 @@
 
 #include "Delegate.hxx"
 
-namespace INET 
+namespace INet 
 {
     typedef Delegate<void (Message* void*)> MsgHandler;
     static const int sMsgHandlerMaxIndex = 1024;

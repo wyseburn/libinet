@@ -24,7 +24,7 @@
 
 #include "Event.hxx"
 
-namespace INET 
+namespace INet 
 {
     class Listener
     {

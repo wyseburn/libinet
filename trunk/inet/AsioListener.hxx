@@ -23,11 +23,9 @@
 #ifndef __INET_ASIO_LISTENER_H__
 #define __INET_ASIO_LISTENER_H__
 
-#ifdef _WITH_BOOST_ASIO
-
 #include "Listener.hxx"
 
-namespace INET 
+namespace INet
 {
     class AsioListenerImpl;
     class AsioListener : Listener
@@ -45,7 +43,5 @@ namespace INET
         AsioListenerImpl* mImpl;
     };
 } // namespace
-
-#endif // #ifdef _WITH_BOOST_ASIO
 
 #endif // #ifndef __INET_ASIO_LISTENER_H__

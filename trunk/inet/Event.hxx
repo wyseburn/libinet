@@ -25,7 +25,7 @@
 #include "Compat.hxx"
 #include "Delegate.hxx"
 
-namespace INET 
+namespace INet 
 {
     class Listener;
     class Client;

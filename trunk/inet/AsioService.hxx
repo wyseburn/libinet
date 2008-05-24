@@ -1,8 +1,7 @@
 /**
- *  Version:     @(#)AioListener.hxx    0.0.1 23/05/2008
+ *  Version:     @(#)AsioService.cxx    0.0.1 24/05/2008
  *  Authors:     Hailong Xia <hlxxxx@gmail.com> 
- *  Brief  :     To implement INET::Listener by libio. You can get 
- *               libio from http://libio.googlecode.com/svn.
+ *  Brief  :     boost::asio::io_service wrapper class.  
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -20,21 +19,25 @@
  *  Boston, MA 02111-1307  USA
  */
 
-#ifndef __INET_AIO_LISTENER_H__
-#define __INET_AIO_LISTENER_H__
+#ifndef __INET_ASIO_SERVICE_H__
+#define __INET_ASIO_SERVICE_H__
 
-#ifdef _WITH_AIO
-
-namespace INET
+namespace INet
 {
-    class AioListener : Listener
+    class AsioServiceImpl;
+    class AsioService
     {
+    public:
+        AsioService();
+        virtual ~AsioService();
 
+        void* get();
+        uint32_t poll();
+        uint32_t run();
 
+    private:
+        AsioServiceImpl* mImpl; 
     };
-}
+} // namespace
 
-#endif // #ifdef _WITH_AIO
-
-#endif // __INET_AIO_LISTENER_H__
-
+#endif // #ifndef __INET_ASIO_SERVICE_H__
