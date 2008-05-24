@@ -52,7 +52,6 @@ namespace INet
     protected:
         MsgHandlers mHandlers;
     };
-
 }
 
 #endif // #ifndef __INET_CLIENT_H__

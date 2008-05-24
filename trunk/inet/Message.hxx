@@ -28,7 +28,7 @@ namespace INet
 {
     struct MsgHdr
     {
-        static const uint32_t sSize = 4; // sizeof(MsgHdr)
+        static const uint32_t sSize = 8; // sizeof(MsgHdr)
         uint32_t mId;                    // Message handler ID   
         uint32_t mLength;                // Message length include header lenght. 
         MsgHdr(uint32_t id = 0) : mId(id), mLength(sSize) {}
@@ -38,24 +38,31 @@ namespace INet
     {
     public:
         static const uint32_t sMaxSize = 1024 * 64;
-        Message(uint32_t bodyLen = 200) 
+        Message(uint32_t bodyLen = 1024) 
             : mInPos(MsgHdr::sSize), mOutPos(MsgHdr::sSize), mGCFlag(true) 
         {
             mSize = MsgHdr::sSize + bodyLen;
             mData = (uint8_t *)malloc(mSize);
             assert(mData);
-
             mHdr = new (mData) MsgHdr();
         }
 
-        Message(uint32_t id, uint32_t bodyLen = 200)
+        Message(uint32_t id, uint32_t bodyLen = 1024)
             : mInPos(MsgHdr::sSize), mOutPos(MsgHdr::sSize), mGCFlag(true) 
         {
             mSize = MsgHdr::sSize + bodyLen;
             mData = (uint8_t *)malloc(mSize);
             assert(mData);
-
             mHdr = new (mData) MsgHdr(id);
+        }
+
+        Message(void* data, uint32_t dataLen)
+            : mInPos(MsgHdr::sSize), mOutPos(MsgHdr::sSize), mGCFlag(false) 
+        {
+            mSize = dataLen;
+            mData = data;
+            assert(mData);
+            mHdr = (MsgHdr *)mData;
         }
 
         virtual ~Message() 
@@ -63,9 +70,11 @@ namespace INet
             if (mGCFlag && mData) free(mData);
         }
 
-        void setMsgId(uint32_t id) { mHdr->mId = id; }
-        uint32_t getMsgId() const { return mHdr->mId; }
-        uint32_t getMsgLen() const { return mHdr->mLength; }
+        void setId(uint32_t id) { mHdr->mId = id; }
+
+        void* get() const { return mData; }
+        uint32_t getId() const { return mHdr->mId; }
+        uint32_t getLen() const { return mHdr->mLength; }
         uint32_t getInPos() const { return mInPos; }
         uint32_t getOutPos() const { return mOutPos; }
 
@@ -92,7 +101,13 @@ namespace INet
         void append(const uint8_t* src, uint32_t len)
         {
             if (len = 0) return;
-            assert(mInPos + len < size_);
+            if (mInPos + len > mSize)
+            {
+                int32_t length = len > 10240 ? len : 10240; 
+                realloc(mData, length); 
+                assert(mData);
+            }
+
             memcpy(mData + mInPos, src, len);
             mInPos += len;
             mHdr->mLength += len; 
