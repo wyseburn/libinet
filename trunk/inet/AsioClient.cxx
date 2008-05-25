@@ -37,13 +37,14 @@ namespace INet
     class AsioClientImpl 
     {
     public:
-		friend class AsioClient;
+        friend class AsioClient;
+
         AsioClientImpl(AsioClient* wrapper, AsioService& service) 
             : mWrapper(wrapper), mService(service)
             , mPendingRecvRequestCount(0), mPendingSendRequestCount(0)
             , mRecvBufOffset(0), mRecvBufDataLength(0)
         {
-			mSocket.reset(new tcp::socket(*(io_service *)service.get())); 
+            mSocket.reset(new tcp::socket(*(io_service *)service.get())); 
             assert(mSocket.get());
         }
 
@@ -52,16 +53,16 @@ namespace INet
             close();
         }
 
-		tcp::socket* getSocket()
-		{
-			return mSocket.get();
-		}
+        tcp::socket* getSocket()
+        {
+            return mSocket.get();
+        }
 
         void asyncConnect(const std::string& host, UInt16 port, bool ssl = false)
         {
-			tcp::resolver resolver(*(io_service *)(mService.get()));
-			tcp::resolver::iterator endpoint(resolver.resolve(tcp::resolver::query(host, 
-				boost::lexical_cast<std::string>(port))));
+            tcp::resolver resolver(*(io_service *)(mService.get()));
+            tcp::resolver::iterator endpoint(resolver.resolve(tcp::resolver::query(host, 
+                boost::lexical_cast<std::string>(port))));
             tcp::resolver::iterator last;
             assert(endpoint != last);
 
@@ -88,10 +89,10 @@ namespace INet
             }
 
             mNextToReadBytes = nbytes;
-			mSocket->async_receive(asio::buffer(mRecvBuf + mRecvBufOffset + mRecvBufDataLength,
+            mSocket->async_receive(asio::buffer(mRecvBuf + mRecvBufOffset + mRecvBufDataLength,
                 Message::sMaxSize - mRecvBufOffset - mRecvBufDataLength),
                 boost::bind(&AsioClientImpl::onReceiveCompletion, this,
-				asio::placeholders::bytes_transferred, asio::placeholders::error));
+                asio::placeholders::bytes_transferred, asio::placeholders::error));
             mPendingRecvRequestCount++;
             return true;
         }
@@ -132,7 +133,7 @@ namespace INet
             }
         }
 
-		void onReceiveCompletion(Int32 nbytes, const error_code& error)
+        void onReceiveCompletion(Int32 nbytes, const error_code& error)
         {
             mPendingRecvRequestCount--;
             if (error.value() != 0)
@@ -162,7 +163,7 @@ namespace INet
                 }
 
                 Message msg(mRecvBuf + mRecvBufOffset, msgHdr->mLength); 
-				if (!mWrapper->getHandlers().handleMsg(msg, NULL))
+                if (!mWrapper->getHandlers().handleMsg(msg, NULL))
                 {
                     std::cout << "The message can't match any registered id" << std::endl;
                 }
@@ -201,14 +202,14 @@ namespace INet
 
     private:
         AsioClient* mWrapper;
-		std::auto_ptr<tcp::socket> mSocket; 
+        std::auto_ptr<tcp::socket> mSocket; 
         AsioService& mService;
         UInt32 mPendingRecvRequestCount;
         UInt32 mPendingSendRequestCount;
         char mRecvBuf[Message::sMaxSize]; 
         UInt32 mRecvBufOffset;
         UInt32 mRecvBufDataLength;
-		UInt32 mNextToReadBytes;
+        UInt32 mNextToReadBytes;
     };
 }
 
@@ -225,8 +226,8 @@ INet::AsioClient::~AsioClient()
 void* 
 INet::AsioClient::getSocket()
 {
-	assert(mImpl);
-	return mImpl->getSocket();
+    assert(mImpl);
+    return mImpl->getSocket();
 }
 
 void 
@@ -239,7 +240,7 @@ void
 INet::AsioClient::connect(const Int8* host, UInt16 port, bool ssl)
 {
     assert(mImpl);
-	mImpl->asyncConnect(host, port, ssl);
+    mImpl->asyncConnect(host, port, ssl);
 }
         
 void 

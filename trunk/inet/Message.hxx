@@ -310,12 +310,12 @@ namespace INet
             return obj;
         }
         
-        MsgHdr*       mHdr;
-        UInt8*        mData;
-        UInt32        mSize;
-        UInt32        mInPos;
-        UInt32        mOutPos;
-        bool          mGCFlag; 
+        MsgHdr*           mHdr;
+        UInt8*            mData;
+        UInt32            mSize;
+        UInt32            mInPos;
+        UInt32            mOutPos;
+        bool              mGCFlag; 
     };
 } // namespace
 

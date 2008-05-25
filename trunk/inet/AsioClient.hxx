@@ -35,7 +35,7 @@ namespace INet
         AsioClient(AsioService& service);
         virtual ~AsioClient();
 
-		void* getSocket();
+        void* getSocket();
 
         virtual void update();
         virtual void connect(const Int8* host, UInt16 port, bool ssl = false);

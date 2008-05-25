@@ -28,7 +28,7 @@ namespace INet
     class AsioServiceImpl
     {
     public:
-		boost::asio::io_service mService;
+        boost::asio::io_service mService;
     };
 } // namespace
 
