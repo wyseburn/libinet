@@ -23,18 +23,28 @@
 #include "AsioClient.hxx"
 #include "Message.hxx"
 
+#include <boost/bind.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/asio.hpp>
+
+using namespace boost::asio;
+using namespace boost::asio::ip;
+using namespace boost::system;
+using namespace boost;
+
 namespace INet
 {
     class AsioClientImpl 
     {
     public:
+		friend class AsioClient;
         AsioClientImpl(AsioClient* wrapper, AsioService& service) 
             : mWrapper(wrapper), mService(service)
             , mPendingRecvRequestCount(0), mPendingSendRequestCount(0)
             , mRecvBufOffset(0), mRecvBufDataLength(0)
         {
-            mSocket.reset(new asio::ip::tcp::socket(service)); 
-            assert(mAsioSocket.get());
+			mSocket.reset(new tcp::socket(*(io_service *)service.get())); 
+            assert(mSocket.get());
         }
 
         virtual ~AsioClientImpl() 
@@ -42,16 +52,21 @@ namespace INet
             close();
         }
 
-        void asyncConnect(const std::string& host, uint16_t port, bool ssl = false)
+		tcp::socket* getSocket()
+		{
+			return mSocket.get();
+		}
+
+        void asyncConnect(const std::string& host, UInt16 port, bool ssl = false)
         {
-            tcp::resolver resolver(*(asio::io_service *)(mService.get()));
-            tcp::resolver::iterator endpoint(resolver.resolve(tcp::resolver::query(host, 
-                boost::lexical_cast<std::string>(port))));
+			tcp::resolver resolver(*(io_service *)(mService.get()));
+			tcp::resolver::iterator endpoint(resolver.resolve(tcp::resolver::query(host, 
+				boost::lexical_cast<std::string>(port))));
             tcp::resolver::iterator last;
             assert(endpoint != last);
 
-            mSocket->async_connect(*endpoint, boost::bind(&AsioClientImpl::handleConnect,
-                this, this, host, port, asio::placeholders::error));
+            mSocket->async_connect(*endpoint, boost::bind(&AsioClientImpl::onConnectCompletion,
+                this, host, port, asio::placeholders::error));
         }
 
         void close()
@@ -59,7 +74,7 @@ namespace INet
             if (mSocket.get()) mSocket->close();
         }
 
-        bool asyncReceive(int32_t nbytes)
+        bool asyncReceive(Int32 nbytes)
         {
             if (nbytes > Message::sMaxSize - mRecvBufDataLength)
                 return false;
@@ -67,23 +82,23 @@ namespace INet
             if (nbytes > Message::sMaxSize - mRecvBufOffset - mRecvBufDataLength)
             {
                 memcpy(mRecvBuf, 
-                    mRecvBuf + mRecvBufOffset + mRecvBufDataLen, 
+                    mRecvBuf + mRecvBufOffset + mRecvBufDataLength, 
                     mRecvBufDataLength);
                 mRecvBufOffset = 0;
             }
 
             mNextToReadBytes = nbytes;
-            mSocket->async_recevie(asio::buffer(mRecvBuf + mRecvBufOffset + mRecvBufDataLength,
+			mSocket->async_receive(asio::buffer(mRecvBuf + mRecvBufOffset + mRecvBufDataLength,
                 Message::sMaxSize - mRecvBufOffset - mRecvBufDataLength),
                 boost::bind(&AsioClientImpl::onReceiveCompletion, this,
-                asio::placeholders::bytes_transferred, asio::placeholder::error));
+				asio::placeholders::bytes_transferred, asio::placeholders::error));
             mPendingRecvRequestCount++;
             return true;
         }
 
         void asyncWrite(const Message& msg)
         {
-            uint32_t length = msg.getLen();
+            UInt32 length = msg.getLen();
             if (length < MsgHdr::sSize) 
             {
                 std::cout << "Invalid message contents" << std::endl;
@@ -93,46 +108,45 @@ namespace INet
             void* buffer = malloc(length);
             assert(buffer);
             memcpy(buffer, msg.get(), length);
-            asio::async_write(*(asio::ip::tcp::socket *)mSocket.get(), 
+            asio::async_write(*(tcp::socket *)mSocket.get(), 
                 asio::buffer(buffer, length),
                 boost::bind(&AsioClientImpl::onWriteCompletion, this, buffer, length, 
                 asio::placeholders::error));
             mPendingSendRequestCount++;
         }
 
-        void onConnectCompletion(const std::string& host, uint16_t port, 
-            const asio::error_code& error)
+        void onConnectCompletion(const std::string& host, UInt16 port, const error_code& error)
         {
             if (!error)
             {
-                mWrapper->mOnConnected();
+                //mWrapper->mOnConnected();
                 asyncReceive(MsgHdr::sSize);
             }
             else if (error.value() > 10054)
             {
-                mWrapper->mOnConnectFailed();
+                //mWrapper->mOnConnectFailed();
             }
             else
             {
-                mWrapper->mOnConnectBroken();
+                //mWrapper->mOnConnectBroken();
             }
         }
 
-        void onReceiveCompletion(int32_t nbytes, const asio::error_code& error)
+		void onReceiveCompletion(Int32 nbytes, const error_code& error)
         {
             mPendingRecvRequestCount--;
             if (error.value() != 0)
             {
                 if (mPendingRecvRequestCount > 0 || mPendingSendRequestCount > 0)
                     return;
-                mWrapper->mOnConnectionLost();
+                //mWrapper->mOnConnectionLost();
             }
             else
             {
                 mRecvBufDataLength += nbytes;
                 if (mRecvBufDataLength < mNextToReadBytes)
                 {
-                    asyncReceive(client, mNextToReadBytes - mRecvBufDataLength);
+                    asyncReceive(mNextToReadBytes - mRecvBufDataLength);
                     return;
                 }
 
@@ -143,12 +157,12 @@ namespace INet
                 MsgHdr* msgHdr = (MsgHdr *)(mRecvBuf + mRecvBufOffset);
                 if (mRecvBufDataLength < msgHdr->mLength)
                 {
-                    asyncReceive(client, msgHdr->mLength - mRecvBufDataLength);
+                    asyncReceive(msgHdr->mLength - mRecvBufDataLength);
                     return;
                 }
 
-                Message msg(mRecvBuf + mRecvBufOffset, mMsgHdr->mLength); 
-                if (!mWrapper->mHandlers->handleMsg(msg, NULL))
+                Message msg(mRecvBuf + mRecvBufOffset, msgHdr->mLength); 
+				if (!mWrapper->getHandlers().handleMsg(msg, NULL))
                 {
                     std::cout << "The message can't match any registered id" << std::endl;
                 }
@@ -165,19 +179,19 @@ namespace INet
             }
         }
 
-        void onWriteCompletion(void* buffer, uint32_t len, const asio::error_code& error)
+        void onWriteCompletion(void* buffer, UInt32 len, const error_code& error)
         {
-            mPendingWriteRequestCount--;
+            mPendingSendRequestCount--;
             if (error.value() != 0)
             {
-                if (!mPendingReadRequestCount && !mPendingWriteRequestCount)
+                if (!mPendingRecvRequestCount && !mPendingSendRequestCount)
                     close();
                 free(buffer);
             } 
             else 
             {
                 Message msg(buffer, len);  
-                if (mWrapper->mHandlers->handleMsg(msg, NULL))
+                if (mWrapper->getHandlers().handleMsg(msg, NULL))
                 {
                     std::cout << "The message can't match any registered id" << std::endl;
                 }
@@ -187,24 +201,32 @@ namespace INet
 
     private:
         AsioClient* mWrapper;
-        std::auto_ptr<asio::ip::tcp::socket> mSocket; 
+		std::auto_ptr<tcp::socket> mSocket; 
         AsioService& mService;
-        uint32_t mPendingRecvRequestCount;
-        uint32_t mPendingSendRequestCount;
+        UInt32 mPendingRecvRequestCount;
+        UInt32 mPendingSendRequestCount;
         char mRecvBuf[Message::sMaxSize]; 
-        uint32_t mRecvBufOffset;
-        uint32_t mRecvBufDataLength;
+        UInt32 mRecvBufOffset;
+        UInt32 mRecvBufDataLength;
+		UInt32 mNextToReadBytes;
     };
 }
 
 INet::AsioClient::AsioClient(AsioService& service)
 {
-    mImpl = new AsioClientImpl(service);
+    mImpl = new AsioClientImpl(this, service);
 }
 
 INet::AsioClient::~AsioClient()
 {
     delete mImpl;
+}
+
+void* 
+INet::AsioClient::getSocket()
+{
+	assert(mImpl);
+	return mImpl->getSocket();
 }
 
 void 
@@ -214,10 +236,10 @@ INet::AsioClient::update()
 }
  
 void 
-INet::AsioClient::connect(const int8_t* host, uint16_t port, bool ssl)
+INet::AsioClient::connect(const Int8* host, UInt16 port, bool ssl)
 {
     assert(mImpl);
-    mImpl->connect(host, port, ssl);
+	mImpl->asyncConnect(host, port, ssl);
 }
         
 void 
@@ -240,14 +262,14 @@ INet::AsioClient::resume()
 }
         
 void 
-INet::AsioClient::send(msg& msg)
+INet::AsioClient::send(Message& msg)
 {
     assert(mImpl);
     mImpl->asyncWrite(msg);
 }
 
 void 
-INet::AsioClient::sentto(const int8_t* ip, uint16_t port, msg& msg)
+INet::AsioClient::sentto(const Int8* ip, UInt16 port, Message& msg)
 {
     assert(mImpl);
 }

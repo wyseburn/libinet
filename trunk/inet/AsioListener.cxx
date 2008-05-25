@@ -21,6 +21,15 @@
  */
 
 #include "AsioListener.hxx"
+#include "AsioClient.hxx"
+
+#include <boost/bind.hpp>
+#include <boost/asio.hpp>
+
+using namespace boost::asio;
+using namespace boost::asio::ip;
+using namespace boost::system;
+using namespace boost;
 
 namespace INet
 {
@@ -28,7 +37,7 @@ namespace INet
     {
     public:
         AsioListenerImpl(AsioListener* wrapper, AsioService& service)
-            : mWrapper(wrapper), mAsioService(service)
+            : mWrapper(wrapper), mService(service)
             , mAcceptor(NULL), mPendingAcceptCount(0), mPrePostAcceptCount(0)
         {}
 
@@ -37,35 +46,36 @@ namespace INet
             delete mAcceptor;
         }
 
-        bool create(uint16_t port, const int8_t* ip = 0) 
+        bool create(UInt16 port, const Int8* ip = 0) 
         {
-            mAcceptor = new asio::ip::tcp::acceptor(mService, 
-                asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port));
+            mAcceptor = new tcp::acceptor(*(io_service *)mService.get(), tcp::endpoint(tcp::v4(), port));
             assert(mAcceptor);
+			return true;
         }
 
-        bool accept(uint32_t postCount, uint32_t backlog = 200, bool ssl = false)
+        bool accept(UInt32 postCount, UInt32 backlog = 200, bool ssl = false)
         {
             mPrePostAcceptCount = postCount; 
-            for (int32_t i = 0; i < mPrePostAcceptCount; i++)
+            for (Int32 i = 0; i < mPrePostAcceptCount; i++)
             {
                 AsioClient* client = new AsioClient(mService);
-                asio::ip::tcp::socket* sock = (asio::ip::tcp::socket *)client->getSocket();
+                tcp::socket* sock = (tcp::socket *)client->getSocket();
                 mAcceptor->async_accept(*sock, boost::bind(&AsioListenerImpl::onAccepted, 
                     this, client, asio::placeholders::error));
                 mPendingAcceptCount++;
             }
+			return true;
         }
 
-        void onAccepted(AsioClient* client, const asio::error_code& error)
+        void onAccepted(AsioClient* client, const error_code& error)
         {
             mPendingAcceptCount--;
             if (!error)
             {
                 EventArgs args;
-                args->mListener = mWrapper;
-                args->mClient = client;
-                mWrapper->mOnAccpted(&client, NULL);
+                args.mListener = mWrapper;
+                args.mClient = client;
+                mWrapper->mOnAccepted(&args, NULL);
             } 
             else
             {
@@ -79,10 +89,10 @@ namespace INet
         }
 
         AsioListener* mWrapper;
-        AsioService* mService;
-        asio::ip::tcp::acceptor* mAcceptor;
-        uint32_t mPendingAcceptCount;
-        uint32_t mPrePostAcceptCount;
+        AsioService& mService;
+        tcp::acceptor* mAcceptor;
+        UInt32 mPendingAcceptCount;
+        UInt32 mPrePostAcceptCount;
     };
 
 } // namespace
@@ -92,36 +102,36 @@ INet::AsioListener::AsioListener(AsioService& service)
     mImpl = new AsioListenerImpl(this, service);
 }
 
-AsioListener::~AsioListener()
+INet::AsioListener::~AsioListener()
 {
     delete mImpl;
 }
 
 bool 
-INet::AsioListener::create(uint16_t port, const int8_t* ip)
+INet::AsioListener::create(UInt16 port, const Int8* ip)
 {
     assert(mImpl);
-    mImpl->create(port, ip);
+    return mImpl->create(port, ip);
 }
 
 bool
-INet::AsioListener::start(uint32_t backlog, bool ssl)
+INet::AsioListener::start(UInt32 backlog, bool ssl)
 {
     assert(mImpl); 
-    mImpl->start(backlog, ssl);
+	return mImpl->accept(backlog, ssl);
 }
 
 void
 INet::AsioListener::update()
 {
     assert(mImpl);
-    mImpl->update();
+    //mImpl->update();
 }
 
 void
 INet::AsioListener::close()
 {
     assert(mImpl);
-    mImpl->close();
+    //mImpl->close();
 }
 

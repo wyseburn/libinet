@@ -35,15 +35,15 @@ namespace INet
     public:
         virtual ~Client() {}
 
-        MsgHandlers getHandlers() { return mHandlers; }
+        MsgHandlers& getHandlers() { return mHandlers; }
 
         virtual void update() = 0;
-        virtual void connect(const int8_t* host, uint16_t port, bool ssl = false) = 0;
+        virtual void connect(const Int8* host, UInt16 port, bool ssl = false) = 0;
         virtual void close() = 0;
         virtual void pause() = 0;
         virtual void resume() = 0;
-        virtual void send(msg& msg, bool closed = false) = 0;
-        virtual void sentto(const int8_t* ip, uint16_t port, msg& msg) = 0;
+        virtual void send(Message& msg) = 0;
+        virtual void sentto(const Int8* ip, UInt16 port, Message& msg) = 0;
         
         EventCallback mOnConnected;
         EventCallback mOnConnectFailed;

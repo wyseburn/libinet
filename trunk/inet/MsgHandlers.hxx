@@ -24,10 +24,11 @@
 #define __INET_MSG_HANDLERS_H__
 
 #include "Delegate.hxx"
+#include "Message.hxx"
 
 namespace INet 
 {
-    typedef Delegate<void (const Message& void*)> MsgHandler;
+    typedef Delegate<void (const Message&,void*)> MsgHandler;
     static const int sMsgHandlerMaxIndex = 1024;
 
     class MsgHandlers
@@ -35,7 +36,7 @@ namespace INet
     public:
         MsgHandlers()
         {
-            for (int32_t i = 0; i < sMsgHandlerMaxIndex; i++)
+            for (Int32 i = 0; i < sMsgHandlerMaxIndex; i++)
             {
                 mHandlers[i] = NULL;
             }
@@ -44,13 +45,13 @@ namespace INet
 
         virtual ~MsgHandlers()
         {
-            for (int32_t i = 0; i < sMsgHandlerMaxIndex; i++)
+            for (Int32 i = 0; i < sMsgHandlerMaxIndex; i++)
             {
                 if (mHandlers[i]) delete mHandlers[i];
             }
         }
 
-        void registerHandler(int32_t id, MsgHandler* handler)
+        void registerHandler(Int32 id, MsgHandler* handler)
         {
             assert(id < sMsgHandlerMaxIndex);
             mHandlers[id] = handler;
@@ -62,7 +63,7 @@ namespace INet
             mDefaultHandler = handler;
         }
 
-        MsgHandler* deregisterHandler(int32_t id)
+        MsgHandler* deregisterHandler(Int32 id)
         { 
             assert(id < sMsgHandlerMaxIndex);
             if (mHandlers[id]) 
@@ -74,7 +75,7 @@ namespace INet
             return NULL; 
         } 
 
-        MsgHandler* getHandler(int32_t id)
+        MsgHandler* getHandler(Int32 id)
         {
             assert(id < sMsgHandlerMaxIndex);
             if (mHandlers[id] == NULL) return mDefaultHandler;
@@ -83,7 +84,6 @@ namespace INet
 
         bool handleMsg(const Message& msg, void* args)
         {
-            assert(msg);
             MsgHandler* handler = getHandler(msg.getId());
             if (!handler || handler->IsEmpty()) 
                 return false;

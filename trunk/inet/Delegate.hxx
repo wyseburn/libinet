@@ -47,8 +47,8 @@
 #define INET_MAKE_PARAMS2_5(t1, t2)   t1##1 t2##1, t1##2 t2##2, t1##3 t2##3, t1##4 t2##4, t1##5 t2##5
 #define INET_MAKE_PARAMS2_6(t1, t2)   t1##1 t2##1, t1##2 t2##2, t1##3 t2##3, t1##4 t2##4, t1##5 t2##5, t1##6 t2##6
 
-#define INET_MAKE_PARAMS1(n, t)         INET_JOIN(X_MAKE_PARAMS1_, n) (t)
-#define INET_MAKE_PARAMS2(n, t1, t2)    INET_JOIN(X_MAKE_PARAMS2_, n) (t1, t2)
+#define INET_MAKE_PARAMS1(n, t)         INET_JOIN(INET_MAKE_PARAMS1_, n) (t)
+#define INET_MAKE_PARAMS2(n, t1, t2)    INET_JOIN(INET_MAKE_PARAMS2_, n) (t1, t2)
 
 namespace INet 
 {

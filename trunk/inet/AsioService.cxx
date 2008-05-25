@@ -19,14 +19,16 @@
  *  Boston, MA 02111-1307  USA
  */
 
-#include "AsioService.h"
+#include "AsioService.hxx"
+
+#include <boost/asio.hpp>
 
 namespace INet
 {
     class AsioServiceImpl
     {
     public:
-        asio::io_service mService;
+		boost::asio::io_service mService;
     };
 } // namespace
 
@@ -48,15 +50,17 @@ INet::AsioService::get()
     return &mImpl->mService;
 }
 
+UInt32
 INet::AsioService::poll()
 {
     assert(mImpl);
-    return mImpl->mService.poll();
+    return (UInt32)mImpl->mService.poll();
 }
 
+UInt32
 INet::AsioService::run()
 {
     assert(mImpl);
-    return mImpl->mService.run();
+    return (UInt32)mImpl->mService.run();
 }
 

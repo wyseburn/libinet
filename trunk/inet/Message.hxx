@@ -23,44 +23,45 @@
 #define __INET_MESSAGE_H__
 
 #include "Compat.hxx"
+#include <cassert>
 
 namespace INet
 {
     struct MsgHdr
     {
-        static const uint32_t sSize = 8; // sizeof(MsgHdr)
-        uint32_t mId;                    // Message handler ID   
-        uint32_t mLength;                // Message length include header lenght. 
-        MsgHdr(uint32_t id = 0) : mId(id), mLength(sSize) {}
+        static const UInt32 sSize = 8; // sizeof(MsgHdr)
+        UInt32 mId;                    // Message handler ID   
+        UInt32 mLength;                // Message length include header lenght. 
+        MsgHdr(UInt32 id = 0) : mId(id), mLength(sSize) {}
     };
 
     class Message  // Support max message length is 64k
     {
     public:
-        static const uint32_t sMaxSize = 1024 * 64;
-        Message(uint32_t bodyLen = 1024) 
+        static const UInt32 sMaxSize = 1024 * 64;
+        Message(UInt32 bodyLen = 1024) 
             : mInPos(MsgHdr::sSize), mOutPos(MsgHdr::sSize), mGCFlag(true) 
         {
             mSize = MsgHdr::sSize + bodyLen;
-            mData = (uint8_t *)malloc(mSize);
+            mData = (UInt8 *)malloc(mSize);
             assert(mData);
             mHdr = new (mData) MsgHdr();
         }
 
-        Message(uint32_t id, uint32_t bodyLen = 1024)
+        Message(UInt32 id, UInt32 bodyLen = 1024)
             : mInPos(MsgHdr::sSize), mOutPos(MsgHdr::sSize), mGCFlag(true) 
         {
             mSize = MsgHdr::sSize + bodyLen;
-            mData = (uint8_t *)malloc(mSize);
+            mData = (UInt8 *)malloc(mSize);
             assert(mData);
             mHdr = new (mData) MsgHdr(id);
         }
 
-        Message(void* data, uint32_t dataLen)
+        Message(void* data, UInt32 dataLen)
             : mInPos(MsgHdr::sSize), mOutPos(MsgHdr::sSize), mGCFlag(false) 
         {
             mSize = dataLen;
-            mData = data;
+            mData = (UInt8 *)data;
             assert(mData);
             mHdr = (MsgHdr *)mData;
         }
@@ -70,40 +71,40 @@ namespace INet
             if (mGCFlag && mData) free(mData);
         }
 
-        void setId(uint32_t id) { mHdr->mId = id; }
+        void setId(UInt32 id) { mHdr->mId = id; }
 
         void* get() const { return mData; }
-        uint32_t getId() const { return mHdr->mId; }
-        uint32_t getLen() const { return mHdr->mLength; }
-        uint32_t getInPos() const { return mInPos; }
-        uint32_t getOutPos() const { return mOutPos; }
+        UInt32 getId() const { return mHdr->mId; }
+        UInt32 getLen() const { return mHdr->mLength; }
+        UInt32 getInPos() const { return mInPos; }
+        UInt32 getOutPos() const { return mOutPos; }
 
     public:
-        void read(void* dst, uint32_t len)
+        void read(void* dst, UInt32 len)
         {
             assert(mOutPos + len < mSize);
             memcpy(dst,  mData + mOutPos, len);
             mOutPos += len;
         }
 
-        void read(void* dst, uint32_t pos /*begin from header*/, uint32_t len)
+        void read(void* dst, UInt32 pos /*begin from header*/, UInt32 len)
         {
             assert(pos + len < mSize);
             memcpy(dst, mData + pos, len);
         }
 
-        void* read(uint32_t pos /*begin form header*/, uint32_t len = 0)
+        void* read(UInt32 pos /*begin form header*/, UInt32 len = 0)
         {
             assert(mOutPos + len < mSize);
             return mData + mOutPos;
         }
 
-        void append(const uint8_t* src, uint32_t len)
+        void append(const UInt8* src, UInt32 len)
         {
             if (len = 0) return;
             if (mInPos + len > mSize)
             {
-                int32_t length = len > 10240 ? len : 10240; 
+                Int32 length = len > 10240 ? len : 10240; 
                 realloc(mData, length); 
                 assert(mData);
             }
@@ -115,108 +116,108 @@ namespace INet
 
         Message& operator << (bool value) 
         { 
-            append<int8_t>((int8_t)value);  
+            append<Int8>((Int8)value);  
             return *this; 
         }
 
         Message& operator >> (bool& value) 
         { 
-            value = read<int8_t>() 0 ? true : false; 
+            value = read<Int8>() == 0 ? true : false; 
             return *this; 
         }
 
-        Message& operator << (int8_t value) 
-        { append<int8_t>((int8_t)value); 
+        Message& operator << (Int8 value) 
+        { append<Int8>((Int8)value); 
             return *this; 
         }
 
-        Message& operator >> (int8_t& value) 
+        Message& operator >> (Int8& value) 
         { 
-            value = read<int8_t>(); 
+            value = read<Int8>(); 
             return *this; 
         }
 
-        Message& operator << (uint8_t value) 
+        Message& operator << (UInt8 value) 
         { 
-            append<uint8_t>((uint8_t)value); 
+            append<UInt8>((UInt8)value); 
             return *this; 
         }
  
-        Message& operator >> (uint8_t& value) 
+        Message& operator >> (UInt8& value) 
         { 
-          value = read<uint8_t>(); 
+          value = read<UInt8>(); 
           return *this; 
         }
 
-        Message& operator << (int16_t value) 
+        Message& operator << (Int16 value) 
         { 
-            append<int16_t>((int16_t)value); 
+            append<Int16>((Int16)value); 
             return *this; 
         }
 
-        Message& operator >> (int16_t& value) 
+        Message& operator >> (Int16& value) 
         { 
-            value = read<int16_t>(); 
+            value = read<Int16>(); 
             return *this; 
         }
 
-        Message& operator << (uint16_t value) 
+        Message& operator << (UInt16 value) 
         { 
-          append<uint16_t>((uint16_t)value); 
+          append<UInt16>((UInt16)value); 
           return *this; 
         }
 
-        Message& operator >> (uint16_t& value) 
+        Message& operator >> (UInt16& value) 
         { 
-           value = read<uint16_t>(); 
+           value = read<UInt16>(); 
            return *this; 
         }
 
-        Message& operator << (int32_t value) 
+        Message& operator << (Int32 value) 
         { 
-            append<int32_t>((int32_t)value); 
+            append<Int32>((Int32)value); 
             return *this; 
         }
 
-        Message& operator >> (int32_t& value) 
+        Message& operator >> (Int32& value) 
         { 
-            value = read<int32_t>(); 
+            value = read<Int32>(); 
             return *this; 
         }
 
-        Message& operator << (uint32_t value) 
+        Message& operator << (UInt32 value) 
         { 
-            append<uint32_t>((uint32_t)value); 
+            append<UInt32>((UInt32)value); 
             return *this; 
         }
 
-        Message& operator >> (uint32_t& value) 
+        Message& operator >> (UInt32& value) 
         { 
-            value = read<uint32_t>(); 
+            value = read<UInt32>(); 
             return *this; 
         }
 
-        Message& operator << (int64_t value) 
+        Message& operator << (Int64 value) 
         { 
-            append<int64_t>((uint32_t)value); 
+            append<Int64>((UInt32)value); 
             return *this; 
         }
 
-        Message& operator >> (int64_t& value) 
+        Message& operator >> (Int64& value) 
         { 
-            value = read<int64_t>(); 
+            value = read<Int64>(); 
             return *this; 
         }
 
-        Message& operator << (uint64_t value) 
+        Message& operator << (UInt64 value) 
         { 
-            append<uint64_t>((uint64_t)value); 
+            append<UInt64>((UInt64)value); 
             return *this; 
         }
 
-        Message& operator >> (uint64_t& value) 
+        Message& operator >> (UInt64& value) 
         { 
-            value = read<uint64_t>(); 
+            value = read<UInt64>(); 
             return *this; 
         }
 
@@ -246,15 +247,15 @@ namespace INet
 
         Message& operator << (const std::string& value)
         {
-            append((uint8_t const *)value.c_str(), value.length());
-            append((uint8_t)0); 
+            append((UInt8 const *)value.c_str(), (UInt32)value.length());
+            append((UInt8)0); 
             return *this;
         }
 
         Message& operator << (const char* value)
         {
-            append((uint8_t const *)value, v ? strlen(value) : 0);
-            append((uint8_t)0);
+            append((UInt8 const *)value, value ? (UInt32)strlen(value) : 0);
+            append((UInt8)0);
             return *this;
         }
 
@@ -263,7 +264,7 @@ namespace INet
             value.clear();
             while (mOutPos < mSize)
             {
-                int8_t c = read<int8_t>();
+                Int8 c = read<Int8>();
                 if (c == 0) break;
                 value += c;
             }
@@ -272,15 +273,15 @@ namespace INet
 
         Message& operator << (const wchar_t* value)
         {
-            append((uint8_t const *)value, value ? wcslen(value)*2 : 0);
-            append((uint16_t)0);
+            append((UInt8 const *)value, value ? (UInt32)wcslen(value)*2 : 0);
+            append((UInt16)0);
             return *this;
         }
 
         Message& operator << (const std::wstring& value)
         {
-            append((uint8_t const *)value.c_str(), value.length()*2);
-            append((uint16_t)0);
+            append((UInt8 const *)value.c_str(), (UInt32)value.length()*2);
+            append((UInt16)0);
             return *this;
         }
  
@@ -289,7 +290,7 @@ namespace INet
             value.clear();
             while (mOutPos < mSize)
             {
-                uint16_t c = read<uint16_t>();
+                UInt16 c = read<UInt16>();
                 if (c == 0) break;
                 value += c;
             }
@@ -298,23 +299,23 @@ namespace INet
         
     private:
         template <typename _T_> 
-        void append(_T_ value) { append((uint8_t *)&value, sizeof(value)); }
+        void append(_T_ value) { append((UInt8 *)&value, sizeof(value)); }
 
         template <typename _T_>
         _T_ read() 
         {
             assert(mOutPos < mSize);
-            _T_ obj =  *((_T_ const *)(mData + mOutPos)) 
+            _T_ obj =  *((_T_ const *)(mData + mOutPos)); 
             mOutPos += sizeof(_T_);
             return obj;
         }
         
-        MsgHdr*         mHdr;
-        uint8_t*        mData;
-        uint32_t        mSize;
-        uint32_t        mInPos;
-        uint32_t        mOutPos;
-        bool            mGCFlag; 
+        MsgHdr*       mHdr;
+        UInt8*        mData;
+        UInt32        mSize;
+        UInt32        mInPos;
+        UInt32        mOutPos;
+        bool          mGCFlag; 
     };
 } // namespace
 

@@ -34,8 +34,8 @@ namespace INet
     public:
         virtual ~Listener() {}
         
-        virtual bool create(uint16_t port, const int8_t* ip = 0) = 0; 
-        virtual bool start(uint32_t backlog = 200, bool ssl = false) = 0;
+        virtual bool create(UInt16 port, const Int8* ip = 0) = 0; 
+        virtual bool start(UInt32 backlog = 200, bool ssl = false) = 0;
 
         virtual void update() = 0;
         virtual void close() = 0;

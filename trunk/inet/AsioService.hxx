@@ -22,6 +22,8 @@
 #ifndef __INET_ASIO_SERVICE_H__
 #define __INET_ASIO_SERVICE_H__
 
+#include "Compat.hxx"
+
 namespace INet
 {
     class AsioServiceImpl;
@@ -32,8 +34,8 @@ namespace INet
         virtual ~AsioService();
 
         void* get();
-        uint32_t poll();
-        uint32_t run();
+        UInt32 poll();
+        UInt32 run();
 
     private:
         AsioServiceImpl* mImpl; 

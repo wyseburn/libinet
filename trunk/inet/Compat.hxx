@@ -33,17 +33,27 @@
 #define ERRNO                              WSAGetLastError()
 #define SOCKET_ERRNUM(errno)               WSA##errno
 
-typedef char                               int8_t;
-typedef __int16                            int16_t;
-typedef __int32                            int32_t;
-typedef __int64                            int64_t;
+typedef char                               Int8;
+typedef __int16                            Int16;
+typedef __int32                            Int32;
+typedef __int64                            Int64;
 
-typedef unsigned char                      uint8_t;
-typedef unsigned __int16                   uint16_t;
-typedef unsigned __int32                   uint32_t;
-typedef unsigned __int64                   uint64_t;
+typedef unsigned char                      UInt8;
+typedef unsigned __int16                   UInt16;
+typedef unsigned __int32                   UInt32;
+typedef unsigned __int64                   UInt64;
 
 #elif defined (__linux__) || defined (__FreeBSD__)
+
+typedef int8_t                             Int8;
+typedef int16_t                            Int16;
+typedef int32_t                            Int32;
+typedef int64_t                            Int64;
+
+typedef uint8_t                            UInt8;
+typedef uint16_t                           UInt16;
+typedef uint32_t                           UInt32;
+typedef uint64_t                           UInt64;
 
 #define closesocket(fd)                    close(fd)
 #define ERRNO                              errno
@@ -52,6 +62,5 @@ typedef unsigned __int64                   uint64_t;
 #include <stdint.h>
 
 #endif // #if defined (_WIN32)
-
 
 #endif // #ifndef __INET_COMPAT_H__
