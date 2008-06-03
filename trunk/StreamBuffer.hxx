@@ -36,7 +36,7 @@ namespace INet
         {
             UInt32    mOff; // valid data position for read
             UInt32    mLen; // data length 
-			INET_QUEUE_ENTRY(Node) mEntries; 
+            INET_QUEUE_ENTRY(Node) mEntries; 
             Node() : mOff(0), mLen(0) {}
         };
 
