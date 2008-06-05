@@ -24,12 +24,15 @@
 
 #include "Service.hxx"
 #include "Delegate.hxx"
+#include "Buffer.hxx"
 
 namespace INet
 {
+    class Session;
     typedef enum { ICMP, UDP, TCP } TransportType;
-    typedef Delegate<Int32 (char*, UInt32)> EventCallback;
-    static const UInt32 sSessionMaxRecvBufferSize = 1024 * 64; 
+    typedef Delegate<void (Session*)> ConnEventCallback;
+    typedef Delegate<void (Session*)> RecvEventCallback;
+    typedef Delegate<void (Session*, const void*, UInt32)> SendEventCallback;
 
     class SessionImpl;
     class Session
@@ -38,22 +41,29 @@ namespace INet
         Session(Service& service, TransportType type);
         virtual ~Session();
 
-        Int32 getSocket();
+        friend class ListenerImpl;
+
+        Service& getService();
+        void* getSocket(); // return boost::ip::tcp::socket pointer
+        Int32 getSocketFd() const;
+        TransportType getTransportType() const;
 
         void close();
         bool asyncConnect(const Int8* remote, UInt16 port);
-        void asyncReceive(UInt32 nbytes); 
-        void asyncSend(void* buffer, UInt32 length);
-        void asyncSendTo(const Int8* remote, UInt16 port, void* buffer, UInt32 length);
+        void asyncSend();
+        void asyncSend(const void* data, UInt32 len);
 
-        EventCallback mOnSent;
-        EventCallback mOnSendFailed;
-        EventCallback mOnReceived;
+        ConnEventCallback mOnConnected;
+        ConnEventCallback mOnConnectFailed;
+        ConnEventCallback mOnConnectBroken;
 
-        EventCallback mOnConnected;
-        EventCallback mOnConnectFailed;
-        EventCallback mOnConnectBroken;
+        SendEventCallback mOnSent;
+        RecvEventCallback mOnReceived;
+        Buffer mSendBuffer;
+        Buffer mRecvBuffer;
+        
     private:
+        void asyncReceive();
         SessionImpl* mImpl; 
     };
 }

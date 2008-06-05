@@ -1,7 +1,7 @@
 /**
  *  Version:     @(#)Serialize.hxx    0.0.1 29/05/2008
  *  Authors:     Hailong Xia <hlxxxx@gmail.com> 
- *  Brief  :     A C++ object serialize implement 
+ *  Brief  :     C++ object serialize implement 
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -73,7 +73,6 @@ namespace INet
         {
             return SerializeTraits<FirstType >::serializedSize(instance.first) +
                    SerializeTraits<SecondType >::serializedSize(instance.second);
-            return 0;
         }
 
         static void serialize(const Type& instance, Buffer& buf)
@@ -86,7 +85,6 @@ namespace INet
         {
             SerializeTraits<FirstType >::unserialize(instance.first, buf);
             SerializeTraits<SecondType >::unserialize(instance.second, buf);
-            // ??? sort
         }
     };
 
@@ -104,7 +102,7 @@ namespace INet
             {
                 size += SerializeTraits<ElemType >::serializedSize(*it);
             }
-            return 0;
+            return size;
         }
 
         static void serialize(const Type& instance, Buffer& buf)
@@ -125,23 +123,29 @@ namespace INet
             {
                 ElemType elem;
                 SerializeTraits<ElemType >::unserialize(elem, buf);
-                // ??? sort
+                instance.push_back(elem);
             }
         }
     };
 
     template <class Type>
-    static bool serialize(Type& instance, Buffer& buf, bool check = true)
+    static UInt32 serializedSize(const Type& instance)
     {
-        if (check == true)
+        return SerializeTraits<Type >::serializedSize(instance);
+    }
+
+    template <class Type>
+    static bool serialize(const Type& instance, Buffer& buf, bool check = true)
+    {
+        /*if (check == true)
         {
-            if (SerializeTraits<Type >::serializedSize(instance) > buf.blankLen())  
+            if (SerializeTraits<Type >::serializedSize(instance) > buf.length())  
             {
                 return false;
             }
-        }
+        }*/
         
-        SerializeTraits<Type >::serialize(instance, buf);
+        SerializeTraits<Type >::serialize((Type&)instance, buf);
         return true;
     }
 
@@ -149,10 +153,10 @@ namespace INet
     template <class Type>
     static bool unserialize(Type& instance, Buffer& buf)
     {
-        if (SerializeTraits<Type >::serializedSize(instance) > buf.remainDataLen())  
+        /*if (SerializeTraits<Type >::serializedSize(instance) > buf.length())  
         {
             return false;
-        }
+        }*/
         
         SerializeTraits<Type >::unserialize(instance, buf);
         return true;
@@ -183,7 +187,7 @@ namespace INet                                                                  
         {                                                                                  \
             return SerializeTraits<Member1Type >::serializedSize(instance.Member1Name);    \
         }                                                                                  \
-        static void serialize(const ClassName& instance, Buffer& buf)                      \
+        static void serialize(ClassName& instance, Buffer& buf)                            \
         {                                                                                  \
             SerializeTraits<Member1Type >::serialize(instance.Member1Name, buf);           \
         }                                                                                  \
@@ -222,7 +226,7 @@ namespace INet                                                                  
             return SerializeTraits<Member1Type >::serializedSize(instance.Member1Name)+    \
                    SerializeTraits<Member2Type >::serializedSize(instance.Member2Name);    \
         }                                                                                  \
-        static void serialize(const ClassName& instance, Buffer& buf)                      \
+        static void serialize(ClassName& instance, Buffer& buf)                            \
         {                                                                                  \
             SerializeTraits<Member1Type >::serialize(instance.Member1Name, buf);           \
             SerializeTraits<Member2Type >::serialize(instance.Member2Name, buf);           \
@@ -269,7 +273,7 @@ namespace INet                                                                  
                    SerializeTraits<Member2Type >::serializedSize(instance.Member2Name)+    \
                    SerializeTraits<Member3Type >::serializedSize(instance.Member3Name);    \
         }                                                                                  \
-        static void serialize(const ClassName& instance, Buffer& buf)                      \
+        static void serialize(ClassName& instance, Buffer& buf)                            \
         {                                                                                  \
             SerializeTraits<Member1Type >::serialize(instance.Member1Name, buf);           \
             SerializeTraits<Member2Type >::serialize(instance.Member2Name, buf);           \
@@ -322,7 +326,7 @@ namespace INet                                                                  
                    SerializeTraits<Member3Type >::serializedSize(instance.Member3Name)+    \
                    SerializeTraits<Member4Type >::serializedSize(instance.Member4Name);    \
         }                                                                                  \
-        static void serialize(const ClassName& instance, Buffer& buf)                      \
+        static void serialize(ClassName& instance, Buffer& buf)                            \
         {                                                                                  \
             SerializeTraits<Member1Type >::serialize(instance.Member1Name, buf);           \
             SerializeTraits<Member2Type >::serialize(instance.Member2Name, buf);           \
@@ -381,7 +385,7 @@ namespace INet                                                                  
                    SerializeTraits<Member4Type >::serializedSize(instance.Member4Name)+    \
                    SerializeTraits<Member5Type >::serializedSize(instance.Member5Name);    \
         }                                                                                  \
-        static void serialize(const ClassName& instance, Buffer& buf)                      \
+        static void serialize(ClassName& instance, Buffer& buf)                            \
         {                                                                                  \
             SerializeTraits<Member1Type >::serialize(instance.Member1Name, buf);           \
             SerializeTraits<Member2Type >::serialize(instance.Member2Name, buf);           \
@@ -448,7 +452,7 @@ namespace INet                                                                  
                    SerializeTraits<Member5Type >::serializedSize(instance.Member5Name)+    \
                    SerializeTraits<Member6Type >::serializedSize(instance.Member6Name);    \
         }                                                                                  \
-        static void serialize(const ClassName& instance, Buffer& buf)                      \
+        static void serialize(ClassName& instance, Buffer& buf)                            \
         {                                                                                  \
             SerializeTraits<Member1Type >::serialize(instance.Member1Name, buf);           \
             SerializeTraits<Member2Type >::serialize(instance.Member2Name, buf);           \
@@ -521,7 +525,7 @@ namespace INet                                                                  
                    SerializeTraits<Member6Type >::serializedSize(instance.Member6Name)+    \
                    SerializeTraits<Member7Type >::serializedSize(instance.Member7Name);    \
         }                                                                                  \
-        static void serialize(const ClassName& instance, Buffer& buf)                      \
+        static void serialize(ClassName& instance, Buffer& buf)                            \
         {                                                                                  \
             SerializeTraits<Member1Type >::serialize(instance.Member1Name, buf);           \
             SerializeTraits<Member2Type >::serialize(instance.Member2Name, buf);           \
@@ -600,7 +604,7 @@ namespace INet                                                                  
                    SerializeTraits<Member7Type >::serializedSize(instance.Member7Name)+    \
                    SerializeTraits<Member8Type >::serializedSize(instance.Member8Name);    \
         }                                                                                  \
-        static void serialize(const ClassName& instance, Buffer& buf)                      \
+        static void serialize(ClassName& instance, Buffer& buf)                            \
         {                                                                                  \
             SerializeTraits<Member1Type >::serialize(instance.Member1Name, buf);           \
             SerializeTraits<Member2Type >::serialize(instance.Member2Name, buf);           \
@@ -685,7 +689,7 @@ namespace INet                                                                  
                    SerializeTraits<Member8Type >::serializedSize(instance.Member8Name)+    \
                    SerializeTraits<Member9Type >::serializedSize(instance.Member9Name);    \
         }                                                                                  \
-        static void serialize(const ClassName& instance, Buffer& buf)                      \
+        static void serialize(ClassName& instance, Buffer& buf)                            \
         {                                                                                  \
             SerializeTraits<Member1Type >::serialize(instance.Member1Name, buf);           \
             SerializeTraits<Member2Type >::serialize(instance.Member2Name, buf);           \
@@ -778,7 +782,7 @@ namespace INet                                                                  
                    SerializeTraits<Member9Type >::serializedSize(instance.Member9Name)+    \
                    SerializeTraits<Member10Type >::serializedSize(instance.Member10Name);  \
         }                                                                                  \
-        static void serialize(const ClassName& instance, Buffer& buf)                      \
+        static void serialize(ClassName& instance, Buffer& buf)                            \
         {                                                                                  \
             SerializeTraits<Member1Type >::serialize(instance.Member1Name, buf);           \
             SerializeTraits<Member2Type >::serialize(instance.Member2Name, buf);           \
@@ -877,7 +881,7 @@ namespace INet                                                                  
                    SerializeTraits<Member10Type >::serializedSize(instance.Member10Name)+  \
                    SerializeTraits<Member11Type >::serializedSize(instance.Member11Name);  \
         }                                                                                  \
-        static void serialize(const ClassName& instance, Buffer& buf)                      \
+        static void serialize(ClassName& instance, Buffer& buf)                            \
         {                                                                                  \
             SerializeTraits<Member1Type >::serialize(instance.Member1Name, buf);           \
             SerializeTraits<Member2Type >::serialize(instance.Member2Name, buf);           \
@@ -982,7 +986,7 @@ namespace INet                                                                  
                    SerializeTraits<Member11Type >::serializedSize(instance.Member11Name)+  \
                    SerializeTraits<Member12Type >::serializedSize(instance.Member12Name);  \
         }                                                                                  \
-        static void serialize(const ClassName& instance, Buffer& buf)                      \
+        static void serialize(ClassName& instance, Buffer& buf)                            \
         {                                                                                  \
             SerializeTraits<Member1Type >::serialize(instance.Member1Name, buf);           \
             SerializeTraits<Member2Type >::serialize(instance.Member2Name, buf);           \
@@ -1095,7 +1099,7 @@ namespace INet                                                                  
                    SerializeTraits<Member12Type >::serializedSize(instance.Member12Name)+  \
                    SerializeTraits<Member13Type >::serializedSize(instance.Member13Name);  \
         }                                                                                  \
-        static void serialize(const ClassName& instance, Buffer& buf)                      \
+        static void serialize(ClassName& instance, Buffer& buf)                            \
         {                                                                                  \
             SerializeTraits<Member1Type >::serialize(instance.Member1Name, buf);           \
             SerializeTraits<Member2Type >::serialize(instance.Member2Name, buf);           \
@@ -1214,7 +1218,7 @@ namespace INet                                                                  
                    SerializeTraits<Member13Type >::serializedSize(instance.Member13Name)+  \
                    SerializeTraits<Member14Type >::serializedSize(instance.Member14Name);  \
         }                                                                                  \
-        static void serialize(const ClassName& instance, Buffer& buf)                      \
+        static void serialize(ClassName& instance, Buffer& buf)                            \
         {                                                                                  \
             SerializeTraits<Member1Type >::serialize(instance.Member1Name, buf);           \
             SerializeTraits<Member2Type >::serialize(instance.Member2Name, buf);           \
@@ -1339,7 +1343,7 @@ namespace INet                                                                  
                    SerializeTraits<Member14Type >::serializedSize(instance.Member14Name)+  \
                    SerializeTraits<Member15Type >::serializedSize(instance.Member15Name);  \
         }                                                                                  \
-        static void serialize(const ClassName& instance, Buffer& buf)                      \
+        static void serialize(ClassName& instance, Buffer& buf)                            \
         {                                                                                  \
             SerializeTraits<Member1Type >::serialize(instance.Member1Name, buf);           \
             SerializeTraits<Member2Type >::serialize(instance.Member2Name, buf);           \

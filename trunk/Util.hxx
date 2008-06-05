@@ -1,4 +1,23 @@
-
+/**
+ *  Version:     @(#)Util.hxx    0.0.1 08/06/2008
+ *  Authors:     Hailong Xia <hlxxxx@gmail.com> 
+ *  Brief  :     
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty 
+ *  of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See 
+ *  the GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General
+ *  Public License along with this library; if not, write to the 
+ *  Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+ *  Boston, MA 02111-1307  USA
+ */
 
 #ifndef __INET_UTIL_H__
 #define __INET_UTIL_H__
@@ -39,7 +58,7 @@ struct {                                                                        
         if (((elm)->field.qe_next = (head)->qh_first) != NULL)                   \
                 (head)->qh_first->field.tqe_prev = &(elm)->field.qe_next;        \
         else                                                                     \
-		(head)->qh_last = &(elm)->field.qe_next;                                 \
+		(head)->qh_last = &(elm)->field.qe_next;                         \
         (head)->qh_first = (elm);                                                \
         (elm)->field.qe_prev = &(head)->qh_first;                                \
 } while (0)
@@ -85,3 +104,4 @@ struct {                                                                        
 } while (0)
 
 #endif // #ifndef __INET_UTIL_H__
+
