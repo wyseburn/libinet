@@ -33,7 +33,7 @@ namespace inet
     class msg_handler
     {
     public:
-        msg_handler() 
+        msg_handler() : pending_flag_(false)
         { 
             memset(handlers_, 0, sizeof(handlers_));
             memset(&default_handler_, 0, sizeof(default_handler_));
@@ -72,31 +72,48 @@ namespace inet
             msg_header header;
             header.id_ = msg_id<MsgType >::_msg_id;
             header.body_len_ = serialize_size(msg);
-            serialize(header, session_->send_buffer_);
-            serialize(msg, session_->send_buffer_);  
-            session_->async_send();
+            if (header.body_len_ > 0)
+            {
+                serialize(header, session_->send_buffer_);
+                serialize(msg, session_->send_buffer_);  
+                session_->async_send();
+            }
         }
 
         void on_received(inet::session* session)
         {
             assert(session_);
 
-            msg_header header;
-            unserialize(header, session_->recv_buffer_);
+            if (pending_flag_ == false)
+            {
+                if (session->recv_buffer_.length() < sizeof(msg_header))
+                {
+                    return;
+                }
 
-            assert(header.id_ > 0); ///  ???
+                unserialize(msghdr_, session_->recv_buffer_);
+                if (msghdr_.id_ < 0 || msghdr_.id_ > MaxMsgId)
+                {
+                    session_->close();
+                }
+            }
 
-            if (header.body_len_ > session_->recv_buffer_.length())
+            if (msghdr_.body_len_ > session_->recv_buffer_.length())
+            {
+                pending_flag_ = true;
                 return;
+            }
 
-            if (!handlers_[header.id_].wrapper_ || !handlers_[header.id_].func_)
+            pending_flag_ = false;
+
+            if (!handlers_[msghdr_.id_].wrapper_ || !handlers_[msghdr_.id_].func_)
             {
                 if (default_handler_.func_)
                     ((Delegate<bool (buffer&)>&)default_handler_.func_)(session_->recv_buffer_); 
                 std::cout << "Cant't match a valid message handler." << std::endl;
                 return;
             }
-            handlers_[header.id_].wrapper_(handlers_[header.id_].func_, session_->recv_buffer_);
+            handlers_[msghdr_.id_].wrapper_(handlers_[msghdr_.id_].func_, session_->recv_buffer_);
         }
 
     private:
@@ -117,6 +134,8 @@ namespace inet
         handler default_handler_;
         handler handlers_[MaxMsgId];
         inet::session* session_;
+        bool pending_flag_;
+        inet::msg_header msghdr_;
     };
 } // namespace
 

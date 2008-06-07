@@ -92,6 +92,12 @@ namespace inet
             async_send();
         }
 
+        void async_send(inet::buffer& buffer)
+        {
+            wrapper_->send_buffer_ += buffer;
+            async_send();
+        }
+
         void on_connected(const std::string& remote, inet_uint16 port, const error_code& error)
         {
             if (!error)
@@ -246,10 +252,10 @@ inet::session::async_send(const void* data, inet_uint32 len)
 }
 
 void 
-inet::async_send(inet::buffer& buffer)
+inet::session::async_send(inet::buffer& buffer)
 {
     assert(impl_);
-    impl_->async_send(buf);
+    impl_->async_send(buffer);
 }
 
 
