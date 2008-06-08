@@ -23,10 +23,9 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/asio.hpp>
 
-using namespace boost::asio;
-using namespace boost::asio::ip;
-using namespace boost::system;
 using namespace boost;
+using namespace boost::asio;
+using namespace boost::system;
 
 namespace inet
 {
@@ -39,7 +38,7 @@ namespace inet
         {
             if (transport == inet::tcp)
             {
-                socket_.reset(new tcp::socket(*(io_service *)service_.get())); 
+                socket_.reset(new ip::tcp::socket(*(io_service *)service_.get())); 
                 assert(socket_.get());
             }
         }
@@ -59,10 +58,10 @@ namespace inet
         {
             if (transport_ == inet::tcp)
             {
-                tcp::resolver resolver(*(io_service *)(service_.get()));
-                tcp::resolver::iterator endpoint(resolver.resolve(tcp::resolver::query(remote, 
+                ip::tcp::resolver resolver(*(io_service *)(service_.get()));
+                ip::tcp::resolver::iterator endpoint(resolver.resolve(ip::tcp::resolver::query((const char *)remote, 
                     boost::lexical_cast<std::string>(port))));
-                tcp::resolver::iterator last;
+                ip::tcp::resolver::iterator last;
                 assert(endpoint != last);
 
                 socket_->async_connect(*endpoint, boost::bind(&session_impl::on_connected,
@@ -78,7 +77,7 @@ namespace inet
                 inet::buffer::node* node;
                 while (node = wrapper_->send_buffer_.pop_node())
                 {
-                    asio::async_write(*(tcp::socket *)socket_.get(), 
+                    asio::async_write(*(ip::tcp::socket *)socket_.get(), 
                         asio::buffer((char *)node + sizeof(inet::buffer::node), node->len_),
                         boost::bind(&session_impl::on_sent, this, node, asio::placeholders::error));
                     pending_send_request_count_++;
@@ -168,7 +167,7 @@ namespace inet
 
     private:
         inet::session* wrapper_;
-        std::auto_ptr<tcp::socket> socket_; 
+        std::auto_ptr<ip::tcp::socket> socket_; 
         inet::service& service_;
         inet::transport transport_;
         inet_uint32 pending_recv_request_count_;

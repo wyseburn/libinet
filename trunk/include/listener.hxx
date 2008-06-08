@@ -23,7 +23,7 @@
 
 #include "session.hxx"
 
-#define INET_ON_ACCEPTED(listener, obj, func) \
+#define INET_REGISTER_ACCEPTED(listener, obj, func) \
     (listener)->on_accepted_ += inet::ACCEPT_EVENT(obj, func)
 
 namespace inet

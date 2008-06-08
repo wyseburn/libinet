@@ -25,17 +25,15 @@
 
 // Macros for template metaprogramming
 
-#define INET_JOIN(a, b)        INET_DO_JOIN(a, b)
-#define INET_DO_JOIN(a, b)     INET_DO_JOIN2(a, b)
-#define INET_DO_JOIN2(a, b)    a##b
+#define INET_JOIN(a, b)        a##b
 
 #define INET_MAKE_PARAMS1_0(t)
 #define INET_MAKE_PARAMS1_1(t)    t##1
-#define INET_MAKE_PARAMS1_2(t)    t##1, ##t##2
-#define INET_MAKE_PARAMS1_3(t)    t##1, ##t##2, ##t##3
-#define INET_MAKE_PARAMS1_4(t)    t##1, ##t##2, ##t##3, ##t##4
-#define INET_MAKE_PARAMS1_5(t)    t##1, ##t##2, ##t##3, ##t##4, ##t##5
-#define INET_MAKE_PARAMS1_6(t)    t##1, ##t##2, ##t##3, ##t##4, ##t##5, ##t##6
+#define INET_MAKE_PARAMS1_2(t)    t##1, t##2
+#define INET_MAKE_PARAMS1_3(t)    t##1, t##2, t##3
+#define INET_MAKE_PARAMS1_4(t)    t##1, t##2, t##3, t##4
+#define INET_MAKE_PARAMS1_5(t)    t##1, t##2, t##3, t##4, t##5
+#define INET_MAKE_PARAMS1_6(t)    t##1, t##2, t##3, t##4, t##5, t##6
 
 #define INET_MAKE_PARAMS2_0(t1, t2)
 #define INET_MAKE_PARAMS2_1(t1, t2)   t1##1 t2##1

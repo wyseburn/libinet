@@ -43,12 +43,12 @@ typedef unsigned __int64                   inet_uint64;
 #elif defined (__linux__) || defined (__FreeBSD__)
 #include <stdint.h>
 
-typedef int8_t                             inet_int8;
+typedef char                               inet_int8;
 typedef int16_t                            inet_int16;
 typedef int32_t                            inet_int32;
 typedef int64_t                            inet_int64;
 
-typedef uint8_t                            inet_uint8;
+typedef unsigned char                      inet_uint8;
 typedef uint16_t                           inet_uint16;
 typedef uint32_t                           inet_uint32;
 typedef uint64_t                           inet_uint64;

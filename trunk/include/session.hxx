@@ -25,19 +25,19 @@
 #include "buffer.hxx"
 
 
-#define INET_ON_CONNECTED(session, obj, func) \
+#define INET_REGISTER_CONNECTED(session, obj, func) \
     (session)->on_connected_ += inet::CONN_EVENT(obj, func)
 
-#define INET_ON_CONNECT_FAILED(session, obj, func) \
+#define INET_REGISTER_CONNECT_FAILED(session, obj, func) \
     (session)->on_connect_failed_ += inet::CONN_EVENT(obj, func)
 
-#define INET_ON_CONNECT_BROKEN(session, obj, func) \
+#define INET_REGISTER_CONNECT_BROKEN(session, obj, func) \
     (session)->on_connect_broken_ += inet::CONN_EVENT(obj, func)
 
-#define INET_ON_RECEIVED(session, obj, func) \
+#define INET_REGISTER_RECEIVED(session, obj, func) \
     (session)->on_received_ += inet::RECV_EVENT(obj, func)
 
-#define INET_ON_SENT(session, obj, func) \
+#define INET_REGISTER_SENT(session, obj, func) \
     (session)->on_sent_ += inet::SEND_EVENT(obj, func)
 
 namespace inet

@@ -23,10 +23,9 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 
-using namespace boost::asio;
-using namespace boost::asio::ip;
-using namespace boost::system;
 using namespace boost;
+using namespace boost::asio;
+using namespace boost::system;
 
 namespace inet
 {
@@ -35,7 +34,7 @@ namespace inet
     public:
         listener_impl(listener* wrapper, inet::service& service, inet_uint16 port, const inet_int8* ip)
             : wrapper_(wrapper), service_(service)
-            , acceptor_(*(io_service *)service.get(), tcp::endpoint(tcp::v4(), port))
+            , acceptor_(*(io_service *)service.get(), ip::tcp::endpoint(ip::tcp::v4(), port))
         {}
 
         ~listener_impl() {}
@@ -45,7 +44,7 @@ namespace inet
         void async_accept(inet::session* session)
         {
             assert(session->get_transport() == inet::tcp);
-            acceptor_.async_accept(*(tcp::socket *)session->get_socket(), 
+            acceptor_.async_accept(*(ip::tcp::socket *)session->get_socket(), 
                 boost::bind(&listener_impl::on_accepted, this, session, asio::placeholders::error));
         }
 
@@ -64,7 +63,7 @@ namespace inet
 
         inet::listener* wrapper_;
         inet::service& service_;
-        tcp::acceptor acceptor_;
+        ip::tcp::acceptor acceptor_;
     };
 
 } // namespace

@@ -35,7 +35,7 @@
 #if INET_DELEGATE_NUM_ARGS == 0
 #define INET_DELEGATE_COMMA
 #else
-#define INET_DELEGATE_COMMA    ,
+#define INET_DELEGATE_COMMA ,
 #endif
 
 namespace inet

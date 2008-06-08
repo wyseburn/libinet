@@ -84,36 +84,39 @@ namespace inet
         {
             assert(session_);
 
-            if (pending_flag_ == false)
+            while (1)
             {
-                if (session->recv_buffer_.length() < sizeof(msg_header))
+                if (pending_flag_ == false)
                 {
-                    return;
+                    if (session->recv_buffer_.length() < sizeof(msg_header))
+                        break;
+
+                    unserialize(msghdr_, session_->recv_buffer_);
+                    if (msghdr_.id_ < 0 || msghdr_.id_ > MaxMsgId)
+                        session_->close();
                 }
 
-                unserialize(msghdr_, session_->recv_buffer_);
-                if (msghdr_.id_ < 0 || msghdr_.id_ > MaxMsgId)
+                if (msghdr_.body_len_ > session_->recv_buffer_.length())
                 {
-                    session_->close();
+                    pending_flag_ = true;
+                    break;
+                }
+
+                pending_flag_ = false;
+
+                if (!handlers_[msghdr_.id_].wrapper_ || !handlers_[msghdr_.id_].func_)
+                {
+                    if (default_handler_.func_)
+                        ((Delegate<bool (buffer&)>&)default_handler_.func_)(session_->recv_buffer_); 
+                    else
+                        session_->close();
+                }
+                else 
+                {
+                    handlers_[msghdr_.id_].wrapper_(handlers_[msghdr_.id_].func_, 
+                        session_->recv_buffer_);
                 }
             }
-
-            if (msghdr_.body_len_ > session_->recv_buffer_.length())
-            {
-                pending_flag_ = true;
-                return;
-            }
-
-            pending_flag_ = false;
-
-            if (!handlers_[msghdr_.id_].wrapper_ || !handlers_[msghdr_.id_].func_)
-            {
-                if (default_handler_.func_)
-                    ((Delegate<bool (buffer&)>&)default_handler_.func_)(session_->recv_buffer_); 
-                std::cout << "Cant't match a valid message handler." << std::endl;
-                return;
-            }
-            handlers_[msghdr_.id_].wrapper_(handlers_[msghdr_.id_].func_, session_->recv_buffer_);
         }
 
     private:

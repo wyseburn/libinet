@@ -43,12 +43,9 @@ namespace inet
 
     template <class Type> struct is_integer { static const bool value = false; };
     template <> struct is_integer<bool> { static const bool value = true; };
-    template <> struct is_integer<char> { static const bool value = true; };
     template <> struct is_integer<long> { static const bool value = true; };
     template <> struct is_integer<unsigned long> { static const bool value = true; };
-#ifndef _WIN32
-    template <> struct IsInteger<Int8> { static const bool value = true; };
-#endif
+    template <> struct is_integer<inet_int8> { static const bool value = true; };
     template <> struct is_integer<inet_int16> { static const bool value = true; };
     template <> struct is_integer<inet_int32> { static const bool value = true; };
     template <> struct is_integer<inet_int64> { static const bool value = true; };

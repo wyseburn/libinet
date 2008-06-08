@@ -45,7 +45,7 @@ namespace inet
         INET_QUEUE_HEAD(node_cache_que, node) cache_;
 		
         buffer(inet_uint32 node_data_size = 4080, inet_uint32 cache_size = 5) 
-            : node_data_size_(node_data_size_), cache_size_(cache_size), cache_len_(0)
+            : node_data_size_(node_data_size), cache_size_(cache_size), cache_len_(0)
         {
             INET_QUEUE_INIT(&data_);
             INET_QUEUE_INIT(&cache_);
@@ -228,17 +228,6 @@ namespace inet
             return *this; 
         }
 
-        buffer& operator << (char value) 
-        { write<inet_int8>((char)value); 
-            return *this; 
-        }
-
-        buffer& operator >> (char& value) 
-        { 
-            value = read<char>(); 
-            return *this; 
-        }
-#ifndef _WIN32
         buffer& operator << (inet_int8 value) 
         { 
             write<inet_int8>((inet_int8)value); 
@@ -250,7 +239,6 @@ namespace inet
             value = read<inet_int8>(); 
             return *this; 
         }
-#endif
 
         buffer& operator << (inet_uint8 value) 
         { 
