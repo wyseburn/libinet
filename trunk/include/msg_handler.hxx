@@ -24,7 +24,7 @@
 #include "session.hxx"
 #include "message.hxx"
 
-#define INET_MSG_REGISTER(handler, msgtype, obj, func) \
+#define INET_REGISTER_MSG(handler, msgtype, obj, func) \
     (handler).register_handler<msgtype>(new inet::Delegate<bool (const msgtype&)>(obj, func))
 
 namespace inet 
@@ -48,7 +48,7 @@ namespace inet
         void init(inet::session* session)
         {
             session_ = session;
-            INET_ON_RECEIVED(session, this, &msg_handler::on_received);
+            INET_REGISTER_RECEIVED(session, this, &msg_handler::on_received);
         }
 
         template <typename MsgType>

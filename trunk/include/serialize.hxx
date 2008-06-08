@@ -25,27 +25,6 @@
 
 namespace inet
 {
-    template <class Type>
-    static inet_uint32 serialize_size(const Type& instance)
-    {
-        return s11n_traits<Type >::s11n_size(instance);
-    }
-
-    template <class Type>
-    static bool serialize(const Type& instance, inet::buffer& buffer)
-    {
-        s11n_traits<Type >::s11n((Type&)instance, buffer);
-        return true;
-    }
-
-    
-    template <class Type>
-    static bool unserialize(Type& instance, inet::buffer& buffer)
-    {
-        s11n_traits<Type >::uns11n(instance, buffer);
-        return true;
-    }
-
     template <class Type, class enable = void>
     struct s11n_traits
     {
@@ -146,6 +125,27 @@ namespace inet
             }
         }
     };
+
+    template <class Type>
+    static inet_uint32 serialize_size(const Type& instance)
+    {
+        return s11n_traits<Type >::s11n_size(instance);
+    }
+
+    template <class Type>
+    static bool serialize(const Type& instance, inet::buffer& buffer)
+    {
+        s11n_traits<Type >::s11n((Type&)instance, buffer);
+        return true;
+    }
+
+    
+    template <class Type>
+    static bool unserialize(Type& instance, inet::buffer& buffer)
+    {
+        s11n_traits<Type >::uns11n(instance, buffer);
+        return true;
+    }
 }
 
 #define INET_S11N_1(classname, member1type, member1name)                                  \

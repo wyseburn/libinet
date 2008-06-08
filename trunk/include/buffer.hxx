@@ -211,9 +211,20 @@ namespace inet
             buffer::node* node;
             INET_QUEUE_FOREACH(node, &other.data_, entries_)
             {
-                write((const inet_int8 *)(node + sizeof(buffer::node) + node->off_), node->len_);
+                write((const inet_int8 *)((char *)node + sizeof(buffer::node) + node->off_), node->len_);
             }
             return *this;
+        }
+
+        buffer& operator >> (buffer& value)
+        {
+            value += *this;
+            buffer::node* node;
+            while (node = INET_QUEUE_FIRST(&data_))
+            {
+                INET_QUEUE_REMOVE(&data_, node, entries_);
+                delete node;
+            }
         }
 
         buffer& operator << (bool value) 
