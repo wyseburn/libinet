@@ -41,8 +41,10 @@ namespace inet
 
         virtual ~msg_handler() 
         { 
-            for (int i = 0; i < MaxMsgId; i++) delete handlers_[i].func_;
-            if (default_handler_.func_)  delete default_handler_.func_;
+            for (int i = 0; i < MaxMsgId; i++) 
+                delete (handlers_[i].func_);
+            if (default_handler_.func_)  
+                delete (default_handler_.func_);
         }
 
         void init(inet::session* session)
