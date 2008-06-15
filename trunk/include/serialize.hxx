@@ -38,9 +38,9 @@ namespace inet
             instance.__inet_s11n(buffer);
         }
 
-        static void uns11n(Type& instance, inet::buffer& buffer)
+        static bool uns11n(Type& instance, inet::buffer& buffer)
         {
-            instance.__inet_uns11n(buffer);
+            return instance.__inet_uns11n(buffer);
         }
     };
 
@@ -55,9 +55,12 @@ namespace inet
             buffer << (Type)instance;
         }
 
-        static void uns11n(Type& instance, inet::buffer& buffer)
+        static bool uns11n(Type& instance, inet::buffer& buffer)
         {
+            if (buffer.length() < sizeof(Type))
+                return false;
             buffer >> instance;
+            return true;
         }
     };
 
@@ -75,14 +78,14 @@ namespace inet
 
         static void s11n(const Type& instance, inet::buffer& buffer)
         {
-            s11n_traits<first_type >::s11n(instance.first, buffer) + 
+            s11n_traits<first_type >::s11n(instance.first, buffer); 
             s11n_traits<second_type >::s11n(instance.second, buffer);
         }
 
-        static void uns11n(Type& instance, inet::buffer& buffer)
+        static bool uns11n(Type& instance, inet::buffer& buffer)
         {
-            s11n_traits<first_type >::uns11n(instance.first, buffer) +
-            s11n_traits<second_type >::uns11n(instance.second, buffer);
+            return s11n_traits<first_type >::uns11n(instance.first, buffer) &&
+                s11n_traits<second_type >::uns11n(instance.second, buffer);
         }
     };
 
@@ -112,7 +115,7 @@ namespace inet
             }
         }
 
-        static void uns11n(Type& instance, inet::buffer& buffer)
+        static bool uns11n(Type& instance, inet::buffer& buffer)
         {
             inet_uint32 size = 0;
             buffer >> size;
@@ -120,9 +123,13 @@ namespace inet
             for (; size; --size)
             {
                 elem_type elem;
-                s11n_traits<elem_type >::uns11n(elem, buffer);
+                if (!s11n_traits<elem_type >::uns11n(elem, buffer))
+                {
+                    return false;
+                }
                 instance.push_back(elem);
             }
+            return true;
         }
     };
 
@@ -157,7 +164,7 @@ void __inet_s11n(inet::buffer& buffer)                                          
 {                                                                                         \
     return inet::s11n_traits<member1type >::s11n(this->member1name, buffer);              \
 }                                                                                         \
-void __inet_uns11n(inet::buffer& buffer)                                                  \
+bool __inet_uns11n(inet::buffer& buffer)                                                  \
 {                                                                                         \
     return inet::s11n_traits<member1type >::uns11n(this->member1name, buffer);            \
 }
@@ -194,7 +201,7 @@ void __inet_s11n(inet::buffer& buffer)                                          
     inet::s11n_traits<member1type >::s11n(this->member1name, buffer);                     \
     inet::s11n_traits<member2type >::s11n(this->member2name, buffer);                     \
 }                                                                                         \
-void __inet_uns11n(inet::buffer& buffer)                                                  \
+bool __inet_uns11n(inet::buffer& buffer)                                                  \
 {                                                                                         \
     inet::s11n_traits<member1type >::uns11n(this->member1name, buffer);                   \
     inet::s11n_traits<member2type >::uns11n(this->member2name, buffer);                   \
@@ -238,7 +245,7 @@ void __inet_s11n(inet::buffer& buffer)                                          
     inet::s11n_traits<member2type >::s11n(this->member2name, buffer);                     \
     inet::s11n_traits<member3type >::s11n(this->member3name, buffer);                     \
 }                                                                                         \
-void __inet_uns11n(inet::buffer& buffer)                                                  \
+bool __inet_uns11n(inet::buffer& buffer)                                                  \
 {                                                                                         \
     inet::s11n_traits<member1type >::uns11n(this->member1name, buffer);                   \
     inet::s11n_traits<member2type >::uns11n(this->member2name, buffer);                   \
@@ -289,7 +296,7 @@ void __inet_s11n(inet::buffer& buffer)                                          
     inet::s11n_traits<member3type >::s11n(this->member3name, buffer);                     \
     inet::s11n_traits<member4type >::s11n(this->member4name, buffer);                     \
 }                                                                                         \
-void __inet_uns11n(inet::buffer& buffer)                                                  \
+bool __inet_uns11n(inet::buffer& buffer)                                                  \
 {                                                                                         \
     inet::s11n_traits<member1type >::uns11n(this->member1name, buffer);                   \
     inet::s11n_traits<member2type >::uns11n(this->member2name, buffer);                   \
@@ -346,7 +353,7 @@ void __inet_s11n(inet::buffer& buffer)                                          
     inet::s11n_traits<member4type >::s11n(this->member4name, buffer);                     \
     inet::s11n_traits<member5type >::s11n(this->member5name, buffer);                     \
 }                                                                                         \
-void __inet_uns11n(inet::buffer& buffer)                                                  \
+bool __inet_uns11n(inet::buffer& buffer)                                                  \
 {                                                                                         \
     inet::s11n_traits<member1type >::uns11n(this->member1name, buffer);                   \
     inet::s11n_traits<member2type >::uns11n(this->member2name, buffer);                   \
@@ -410,7 +417,7 @@ void __inet_s11n(inet::buffer& buffer)                                          
     inet::s11n_traits<member5type >::s11n(this->member5name, buffer);                     \
     inet::s11n_traits<member6type >::s11n(this->member6name, buffer);                     \
 }                                                                                         \
-void __inet_uns11n(inet::buffer& buffer)                                                  \
+bool __inet_uns11n(inet::buffer& buffer)                                                  \
 {                                                                                         \
     inet::s11n_traits<member1type >::uns11n(this->member1name, buffer);                   \
     inet::s11n_traits<member2type >::uns11n(this->member2name, buffer);                   \
@@ -481,7 +488,7 @@ void __inet_s11n(inet::buffer& buffer)                                          
     inet::s11n_traits<member6type >::s11n(this->member6name, buffer);                     \
     inet::s11n_traits<member7type >::s11n(this->member7name, buffer);                     \
 }                                                                                         \
-void __inet_uns11n(inet::buffer& buffer)                                                  \
+bool __inet_uns11n(inet::buffer& buffer)                                                  \
 {                                                                                         \
     inet::s11n_traits<member1type >::uns11n(this->member1name, buffer);                   \
     inet::s11n_traits<member2type >::uns11n(this->member2name, buffer);                   \
@@ -558,7 +565,7 @@ void __inet_s11n(inet::buffer& buffer)                                          
     inet::s11n_traits<member7type >::s11n(this->member7name, buffer);                     \
     inet::s11n_traits<member8type >::s11n(this->member8name, buffer);                     \
 }                                                                                         \
-void __inet_uns11n(inet::buffer& buffer)                                                  \
+bool __inet_uns11n(inet::buffer& buffer)                                                  \
 {                                                                                         \
     inet::s11n_traits<member1type >::uns11n(this->member1name, buffer);                   \
     inet::s11n_traits<member2type >::uns11n(this->member2name, buffer);                   \
@@ -641,7 +648,7 @@ void __inet_s11n(inet::buffer& buffer)                                          
     inet::s11n_traits<member8type >::s11n(this->member8name, buffer);                     \
     inet::s11n_traits<member9type >::s11n(this->member9name, buffer);                     \
 }                                                                                         \
-void __inet_uns11n(inet::buffer& buffer)                                                  \
+bool __inet_uns11n(inet::buffer& buffer)                                                  \
 {                                                                                         \
     inet::s11n_traits<member1type >::uns11n(this->member1name, buffer);                   \
     inet::s11n_traits<member2type >::uns11n(this->member2name, buffer);                   \
@@ -731,7 +738,7 @@ void __inet_s11n(inet::buffer& buffer)                                          
     inet::s11n_traits<member9type >::s11n(this->member9name, buffer);                     \
     inet::s11n_traits<member10type >::s11n(this->member10name, buffer);                   \
 }                                                                                         \
-void __inet_uns11n(inet::buffer& buffer)                                                  \
+bool __inet_uns11n(inet::buffer& buffer)                                                  \
 {                                                                                         \
     inet::s11n_traits<member1type >::uns11n(this->member1name, buffer);                   \
     inet::s11n_traits<member2type >::uns11n(this->member2name, buffer);                   \
@@ -828,7 +835,7 @@ void __inet_s11n(inet::buffer& buffer)                                          
     inet::s11n_traits<member10type >::s11n(this->member10name, buffer);                   \
     inet::s11n_traits<member11type >::s11n(this->member11name, buffer);                   \
 }                                                                                         \
-void __inet_uns11n(inet::buffer& buffer)                                                  \
+bool __inet_uns11n(inet::buffer& buffer)                                                  \
 {                                                                                         \
     inet::s11n_traits<member1type >::uns11n(this->member1name, buffer);                   \
     inet::s11n_traits<member2type >::uns11n(this->member2name, buffer);                   \
@@ -931,7 +938,7 @@ void __inet_s11n(inet::buffer& buffer)                                          
     inet::s11n_traits<member11type >::s11n(this->member11name, buffer);                   \
     inet::s11n_traits<member12type >::s11n(this->member12name, buffer);                   \
 }                                                                                         \
-void __inet_uns11n(inet::buffer& buffer)                                                  \
+bool __inet_uns11n(inet::buffer& buffer)                                                  \
 {                                                                                         \
     inet::s11n_traits<member1type >::uns11n(this->member1name, buffer);                   \
     inet::s11n_traits<member2type >::uns11n(this->member2name, buffer);                   \
@@ -1041,7 +1048,7 @@ void __inet_s11n(inet::buffer& buffer)                                          
     inet::s11n_traits<member12type >::s11n(this->member12name, buffer);                   \
     inet::s11n_traits<member13type >::s11n(this->member13name, buffer);                   \
 }                                                                                         \
-void __inet_uns11n(inet::buffer& buffer)                                                  \
+bool __inet_uns11n(inet::buffer& buffer)                                                  \
 {                                                                                         \
     inet::s11n_traits<member1type >::uns11n(this->member1name, buffer);                   \
     inet::s11n_traits<member2type >::uns11n(this->member2name, buffer);                   \
@@ -1158,7 +1165,7 @@ void __inet_s11n(inet::buffer& buffer)                                          
     inet::s11n_traits<member13type >::s11n(this->member13name, buffer);                   \
     inet::s11n_traits<member14type >::s11n(this->member14name, buffer);                   \
 }                                                                                         \
-void __inet_uns11n(inet::buffer& buffer)                                                  \
+bool __inet_uns11n(inet::buffer& buffer)                                                  \
 {                                                                                         \
     inet::s11n_traits<member1type >::uns11n(this->member1name, buffer);                   \
     inet::s11n_traits<member2type >::uns11n(this->member2name, buffer);                   \
@@ -1281,7 +1288,7 @@ void __inet_s11n(inet::buffer& buffer)                                          
     inet::s11n_traits<member14type >::s11n(this->member14name, buffer);                   \
     inet::s11n_traits<member15type >::s11n(this->member15name, buffer);                   \
 }                                                                                         \
-void __inet_uns11n(inet::buffer& buffer)                                                  \
+bool __inet_uns11n(inet::buffer& buffer)                                                  \
 {                                                                                         \
     inet::s11n_traits<member1type >::uns11n(this->member1name, buffer);                   \
     inet::s11n_traits<member2type >::uns11n(this->member2name, buffer);                   \

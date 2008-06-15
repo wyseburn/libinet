@@ -24,31 +24,35 @@
 #include "session.hxx"
 #include "message.hxx"
 
-#define INET_REGISTER_MSG(handler, msgtype, obj, func) \
-    (handler).register_handler<msgtype>(new inet::Delegate<bool (const msgtype&)>(obj, func))
+#define INET_REGISTER_DEFAULT_MSG(handler, obj, func) \
+    (handler).register_default_handler(DEFAULT_MSG_HANDLER(obj, func))
+
+#define INET_REGISTER_MSG(handler, type, obj, func) \
+    (handler).register_handler<type>(new inet::Delegate<bool (const type&)>(obj, func))
 
 namespace inet 
 {
-    template <inet_uint32 MaxMsgId = 64> // message handler array size
+    typedef Delegate<bool (inet_uint16/*msg id*/, inet_uint32/*msg len*/, buffer&)> DEFAULT_MSG_HANDLER;
+    template <inet_uint16 MaxMsgId = 64>
     class msg_handler
     {
     public:
         msg_handler() : pending_flag_(false)
         { 
             memset(handlers_, 0, sizeof(handlers_));
-            memset(&default_handler_, 0, sizeof(default_handler_));
         }
 
         virtual ~msg_handler() 
         { 
-            for (int i = 0; i < MaxMsgId; i++) 
+            for (inet_uint16 i = 0; i < MaxMsgId; i++) 
+            {
                 delete (handlers_[i].func_);
-            if (default_handler_.func_)  
-                delete (default_handler_.func_);
+            }
         }
 
         void init(inet::session* session)
         {
+            assert(session);
             session_ = session;
             INET_REGISTER_RECEIVED(session, this, &msg_handler::on_received);
         }
@@ -62,9 +66,9 @@ namespace inet
             handlers_[id].func_ = (void *)handler;
         }
 
-        void register_default_handler(const Delegate<bool (buffer&)>& handler)
+        void register_default_handler(const DEFAULT_MSG_HANDLER& handler)
         {
-            default_handler_.func_ = (void *)&handler;
+            default_handler_ = handler;
         }
 
         template <class MsgType>
@@ -74,31 +78,35 @@ namespace inet
             msg_header header;
             header.id_ = msg_id<MsgType >::_msg_id;
             header.body_len_ = serialize_size(msg);
+            serialize(header, session_->send_buffer_);
             if (header.body_len_ > 0)
-            {
-                serialize(header, session_->send_buffer_);
                 serialize(msg, session_->send_buffer_);  
-                session_->async_send();
-            }
+            session_->async_send();
         }
 
-        void on_received(inet::session* session)
+        void on_received(inet::session* session, buffer& istream, buffer& ostream)
         {
-            assert(session_);
-
             while (1)
             {
                 if (pending_flag_ == false)
                 {
-                    if (session->recv_buffer_.length() < sizeof(msg_header))
+                    if (istream.length() < sizeof(struct msg_header))
                         break;
 
-                    unserialize(msghdr_, session_->recv_buffer_);
+                    if (!unserialize(msghdr_, istream))
+                    {
+                        std::cout << "Failed to unserialized for message header." << std::endl;
+                        session->close();
+                    }
+
                     if (msghdr_.id_ < 0 || msghdr_.id_ > MaxMsgId)
-                        session_->close();
+                    {
+                        std::cout << "Invalid message id." << std::endl;
+                        session->close();
+                    }
                 }
 
-                if (msghdr_.body_len_ > session_->recv_buffer_.length())
+                if (msghdr_.body_len_ > istream.length())
                 {
                     pending_flag_ = true;
                     break;
@@ -108,25 +116,29 @@ namespace inet
 
                 if (!handlers_[msghdr_.id_].wrapper_ || !handlers_[msghdr_.id_].func_)
                 {
-                    if (default_handler_.func_)
-                        ((Delegate<bool (buffer&)>&)default_handler_.func_)(session_->recv_buffer_); 
+                    if (!default_handler_.IsEmpty())
+                    {
+                        (default_handler_)(msghdr_.id_, msghdr_.body_len_, istream); 
+                    }
                     else
-                        session_->close();
+                    {
+                        std::cout << "Don't match this message." << std::endl;
+                        session->close();
+                    }
                 }
                 else 
                 {
-                    handlers_[msghdr_.id_].wrapper_(handlers_[msghdr_.id_].func_, 
-                        session_->recv_buffer_);
+                    handlers_[msghdr_.id_].wrapper_(handlers_[msghdr_.id_].func_, istream);
                 }
             }
         }
 
     private:
         template <typename MsgType>
-        static bool handler_wrapper(void* func, buffer& buf)
+        static bool handler_wrapper(void* func, buffer& istream)
         {
             MsgType msg; 
-            unserialize(msg, buf);
+            if (!unserialize(msg, istream)) return false;
             return ((Delegate<bool (const MsgType&)>*)func)->operator () (msg);
         }
 
@@ -136,7 +148,7 @@ namespace inet
             void* func_; 
         };
 
-        handler default_handler_;
+        DEFAULT_MSG_HANDLER default_handler_;
         handler handlers_[MaxMsgId];
         inet::session* session_;
         bool pending_flag_;

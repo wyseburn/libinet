@@ -40,13 +40,13 @@ public:
         async_accept(cli);
     }
  
-    void on_accepted(inet::session* session)
+    void on_accepted(inet::session* session, inet::buffer& istream, inet::buffer& ostream)
     {
         accept();
         INET_REGISTER_CONNECT_BROKEN(session, this, &client_manager::on_disconnected);
     }
 
-    void on_disconnected(inet::session* session)
+    void on_disconnected(inet::session* session, inet::buffer& istream, inet::buffer& ostream)
     {
         delete session;
     }

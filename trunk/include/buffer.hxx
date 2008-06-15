@@ -67,6 +67,10 @@ namespace inet
             }
         }
 
+        /**
+         * Allocate a memory block which size is node_data_size_. You can return it
+         * through the same object function dealloc_node or push_node 
+         */
         buffer::node* alloc_node()
         {
             buffer::node* node = NULL;
@@ -96,6 +100,9 @@ namespace inet
             cache_len_++;
         }
 
+        /**
+         * The argument node must be allocated by the same object of alloc_node or pop_node
+         */
         void push_node(buffer::node* node)
         {
             assert(node);
@@ -117,30 +124,52 @@ namespace inet
             inet_uint32 length = 0;
             buffer::node* node;
             INET_QUEUE_FOREACH(node, &data_, entries_)
-            length += node->len_;
+            {
+                length += node->len_;
+            }
             return length;
         }
 
+        void drain(inet_uint32 nbytes)
+        {
+            buffer::node* node = INET_QUEUE_FIRST(&data_);
+            while (node && nbytes > 0 && nbytes >= node->len_)
+            {
+                nbytes -= node->len_;
+                buffer::node* tmp = INET_QUEUE_NEXT(node, entries_);
+                INET_QUEUE_REMOVE(&data_, node, entries_);
+                dealloc_node(node);
+                node = tmp;
+            }
+ 
+            if (node && nbytes > 0)
+            {
+                node->off_ += nbytes;
+                node->len_ -= nbytes;
+            }
+        }
+
+        /**
+         * The object's data will be erased for nbytes length
+         */
         inet_uint32 read(void* buf, inet_uint32 nbytes)
         {
-            inet_uint32 drain = 0;
             buffer::node* node = INET_QUEUE_FIRST(&data_);
-            if (node->off_ + nbytes <= node->len_)
+            if (nbytes <= node->len_)
             {
-                drain = node->len_ < nbytes ? node->len_ : nbytes;
-                memcpy(buf, (char *)node + sizeof(buffer::node) + node->off_, drain);
-                node->off_ += drain;
-                node->len_ -= drain;
+                memcpy(buf, (char *)node + sizeof(buffer::node) + node->off_, nbytes);
+                node->off_ += nbytes;
+                node->len_ -= nbytes;
                 if (node->len_ == 0)
                 {
                     INET_QUEUE_REMOVE(&data_, node, entries_);
                     dealloc_node(node);
                 }
-                return drain;
+                return nbytes;
             }
 
-            inet_uint32 len = 0, blank = 0; 
-            while (node && len < nbytes)
+            inet_uint32 retlen = 0, drain = 0, blank = 0; 
+            while (node && retlen < nbytes)
             {
                 if (node->len_ == 0)
                 {
@@ -150,13 +179,61 @@ namespace inet
                     node = tmp;
                     continue;
                 }
-                drain = node->len_ < nbytes ? node->len_ : nbytes; 
-                memcpy((char *)buf + len, (char *)node + sizeof(buffer::node) + node->off_, drain);
+                drain = node->len_ < nbytes - drain ? node->len_ : nbytes - drain; 
+                memcpy((char *)buf + retlen, (char *)node + sizeof(buffer::node) + node->off_, drain);
                 node->off_ += drain;
                 node->len_ -= drain;
-                len += drain;
+                retlen += drain;
             }
-            return len;
+            return retlen;
+        }
+
+        /**
+         * The object's data will be erased for nbytes length
+         */
+        inet_uint32 read(buffer& buf, inet_uint32 nbytes)
+        {
+            buffer::node* node = INET_QUEUE_FIRST(&data_);
+            if (nbytes <= node->len_)
+            {
+                buf.write((char *)node + sizeof(buffer::node) + node->off_, nbytes); 
+                node->off_ += nbytes;
+                node->len_ -= nbytes;
+                if (node->len_ == 0)
+                {
+                    INET_QUEUE_REMOVE(&data_, node, entries_);
+                    dealloc_node(node);
+                }
+                return nbytes;
+            }
+
+            inet_uint32 retlen = 0, drain = 0, blank = 0; 
+            while (node && retlen < nbytes)
+            {
+                if (node->len_ == 0)
+                {
+                    buffer::node* tmp = INET_QUEUE_NEXT(node, entries_);
+                    INET_QUEUE_REMOVE(&data_, node, entries_);
+                    dealloc_node(node);
+                    node = tmp;
+                    continue;
+                }
+                drain = node->len_ < nbytes - drain ? node->len_ : nbytes - drain; 
+                buf.write((char *)node + sizeof(buffer::node) + node->off_, drain);
+                node->off_ += drain;
+                node->len_ -= drain;
+                retlen += drain;
+            }
+            return retlen; 
+        }
+ 
+        template <typename _T_>
+        _T_ read() 
+        {
+            _T_ obj;
+            inet_uint32 len = read((char *)&obj, sizeof(_T_));
+            assert(len == sizeof(_T_));
+            return obj; 
         }
 
         void write(const inet_int8* src, inet_uint32 nbytes)
@@ -185,27 +262,24 @@ namespace inet
         template <typename _T_> 
         void write(_T_ value) { write((inet_int8 *)&value, sizeof(value)); }
 
-        template <typename _T_>
-        _T_ read() 
-        {
-            _T_ obj;
-            inet_uint32 len = read((char *)&obj, sizeof(_T_));
-            assert(len == sizeof(_T_));
-            return obj; 
-        }
-
+        /**
+         * The source object's data will be not erased
+         */
         buffer& operator = (buffer& other)
         {
             buffer::node* node;
             while (node = INET_QUEUE_FIRST(&data_))
             {
                 INET_QUEUE_REMOVE(&data_, node, entries_);
-                delete node;
+                dealloc_node(node);
             }
             this->operator += (other);
             return *this;
         }
 
+        /**
+         * The source object's data will be not erased
+         */
         buffer& operator += (buffer& other)
         {
             buffer::node* node;
@@ -216,6 +290,9 @@ namespace inet
             return *this;
         }
 
+        /**
+         * The source object's data will be erased
+         */
         buffer& operator >> (buffer& value)
         {
             value += *this;

@@ -28,7 +28,7 @@
 
 namespace inet
 {
-    typedef Delegate<void (session*)> ACCEPT_EVENT;
+    typedef Delegate<void (session*, buffer&/*istream*/, buffer&/*ostream*/)> ACCEPT_EVENT;
     class listener_impl;
     class listener
     {

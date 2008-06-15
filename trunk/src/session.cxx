@@ -102,15 +102,15 @@ namespace inet
             if (!error)
             {
                 async_receive();
-                wrapper_->on_connected_(wrapper_);
+                wrapper_->on_connected_(wrapper_, wrapper_->recv_buffer_, wrapper_->send_buffer_);
             }
             else if (error.value() > 10054)
             {
-                wrapper_->on_connect_failed_(wrapper_);
+                wrapper_->on_connect_failed_(wrapper_, wrapper_->recv_buffer_, wrapper_->send_buffer_);
             }
             else
             {
-                wrapper_->on_connect_broken_(wrapper_);
+                wrapper_->on_connect_broken_(wrapper_, wrapper_->recv_buffer_, wrapper_->send_buffer_);
             }
         }
 
@@ -122,12 +122,12 @@ namespace inet
             if (error.value() != 0)
             {
                 if (!pending_recv_request_count_ && !pending_send_request_count_)
-                    wrapper_->on_connect_broken_(wrapper_);
+                    wrapper_->on_connect_broken_(wrapper_, wrapper_->recv_buffer_, wrapper_->send_buffer_);
             }
             else
             {
                 async_receive();
-                wrapper_->on_received_(wrapper_);
+                wrapper_->on_received_(wrapper_, wrapper_->recv_buffer_, wrapper_->send_buffer_);
             }
         }
 
@@ -138,7 +138,7 @@ namespace inet
             {
                 if (!pending_recv_request_count_ && !pending_send_request_count_)
                 {
-                    wrapper_->on_connect_broken_(wrapper_);
+                    wrapper_->on_connect_broken_(wrapper_, wrapper_->recv_buffer_, wrapper_->send_buffer_);
                 }
             } 
             else 

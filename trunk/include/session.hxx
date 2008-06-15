@@ -26,27 +26,27 @@
 
 
 #define INET_REGISTER_CONNECTED(session, obj, func) \
-    (session)->on_connected_ += inet::CONN_EVENT(obj, func)
+    (session)->on_connected_ += inet::CONN_EVENT_CB(obj, func)
 
 #define INET_REGISTER_CONNECT_FAILED(session, obj, func) \
-    (session)->on_connect_failed_ += inet::CONN_EVENT(obj, func)
+    (session)->on_connect_failed_ += inet::CONN_EVENT_CB(obj, func)
 
 #define INET_REGISTER_CONNECT_BROKEN(session, obj, func) \
-    (session)->on_connect_broken_ += inet::CONN_EVENT(obj, func)
+    (session)->on_connect_broken_ += inet::CONN_EVENT_CB(obj, func)
 
 #define INET_REGISTER_RECEIVED(session, obj, func) \
-    (session)->on_received_ += inet::RECV_EVENT(obj, func)
+    (session)->on_received_ += inet::RECV_EVENT_CB(obj, func)
 
 #define INET_REGISTER_SENT(session, obj, func) \
-    (session)->on_sent_ += inet::SEND_EVENT(obj, func)
+    (session)->on_sent_ += inet::SEND_EVENT_CB(obj, func)
 
 namespace inet
 {
     class session;
     typedef enum { icmp = 0, udp, tcp } transport;
-    typedef Delegate<void (session*)> CONN_EVENT;
-    typedef Delegate<void (session*)> RECV_EVENT;
-    typedef Delegate<void (session*, const void*, inet_uint32)> SEND_EVENT;
+    typedef Delegate<void (session*, buffer&/*istream*/, buffer&/*ostream*/)> CONN_EVENT_CB;
+    typedef Delegate<void (session*, buffer&/*istream*/, buffer&/*ostream*/)> RECV_EVENT_CB;
+    typedef Delegate<void (session*, const void* /*buffer*/, inet_uint32/*buffer length*/)> SEND_EVENT_CB;
 
     class session_impl;
     class session
@@ -67,20 +67,17 @@ namespace inet
         void async_send();
         void async_send(inet::buffer& buffer);
         void async_send(const void* data, inet_uint32 len);
-        inet_uint32 read(void* data, inet_uint32 len) 
-        { 
-            return recv_buffer_.read(data, len); 
-        }
+        inet_uint32 read(void* data, inet_uint32 len) {return recv_buffer_.read(data, len);}
 
-        CONN_EVENT on_connected_;
-        CONN_EVENT on_connect_failed_;
-        CONN_EVENT on_connect_broken_;
+        CONN_EVENT_CB on_connected_;
+        CONN_EVENT_CB on_connect_failed_;
+        CONN_EVENT_CB on_connect_broken_;
+        SEND_EVENT_CB on_sent_;
+        RECV_EVENT_CB on_received_;
 
-        SEND_EVENT on_sent_;
-        RECV_EVENT on_received_;
         inet::buffer send_buffer_;
         inet::buffer recv_buffer_;
-        
+
     private:
         void async_receive();
         session_impl* impl_; 

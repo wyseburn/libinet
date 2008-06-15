@@ -23,7 +23,7 @@ public:
         async_connect(ip, port);
     }
 
-    void on_connected(inet::session*)
+    void on_connected(inet::session*, inet::buffer&, inet::buffer&)
     {
         std::cout << "connect to server success" << std::endl;
 
@@ -33,12 +33,12 @@ public:
         msg_handler_.send_msg(req);
     }
 
-    void on_connect_failed(inet::session*)
+    void on_connect_failed(inet::session*, inet::buffer&, inet::buffer&)
     {
         std::cout << "failed to connect server" << std::endl;
     }
 
-    void on_connect_broken(inet::session*)
+    void on_connect_broken(inet::session*, inet::buffer&, inet::buffer&)
     {
         std::cout << "connect broken" << std::endl;
     }

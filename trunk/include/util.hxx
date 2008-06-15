@@ -56,7 +56,7 @@ struct {                                                                        
         if (((elm)->field.qe_next = (head)->qh_first) != NULL)                   \
                 (head)->qh_first->field.tqe_prev = &(elm)->field.qe_next;        \
         else                                                                     \
-		(head)->qh_last = &(elm)->field.qe_next;                                 \
+		(head)->qh_last = &(elm)->field.qe_next;                         \
         (head)->qh_first = (elm);                                                \
         (elm)->field.qe_prev = &(head)->qh_first;                                \
 } while (0)

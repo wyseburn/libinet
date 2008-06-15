@@ -53,7 +53,7 @@ namespace inet
             if (!error)
             {
                 session->async_receive();
-                wrapper_->on_accepted_(session);
+                wrapper_->on_accepted_(session, session->recv_buffer_, session->send_buffer_);
             } 
             else
             {

@@ -12,6 +12,6 @@ struct echo_req
     std::string msg_;
 };
 
-INET_MESSAGE_2(1, echo_req, unsigned int, id_, std::string, msg_);
+INET_MESSAGE_2(1, echo_req, unsigned int, id_, std::string, msg_); 
 
 #endif // #ifndef __INET_TEST_MSG_H__
