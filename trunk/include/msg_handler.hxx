@@ -84,6 +84,15 @@ namespace inet
             session_->async_send();
         }
 
+    private:
+        template <typename MsgType>
+        static bool handler_wrapper(void* func, buffer& istream)
+        {
+            MsgType msg; 
+            if (!unserialize(msg, istream)) return false;
+            return ((Delegate<bool (const MsgType&)>*)func)->operator () (msg);
+        }
+
         void on_received(inet::session* session, buffer& istream, buffer& ostream)
         {
             while (1)
@@ -131,15 +140,6 @@ namespace inet
                     handlers_[msghdr_.id_].wrapper_(handlers_[msghdr_.id_].func_, istream);
                 }
             }
-        }
-
-    private:
-        template <typename MsgType>
-        static bool handler_wrapper(void* func, buffer& istream)
-        {
-            MsgType msg; 
-            if (!unserialize(msg, istream)) return false;
-            return ((Delegate<bool (const MsgType&)>*)func)->operator () (msg);
         }
 
         struct handler
