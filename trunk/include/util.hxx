@@ -1,5 +1,5 @@
 /**
- *  Version:     @(#)libinet/util.hxx    0.0.2 08/06/2008
+ *  Version:     @(#)libinet/util.hxx    0.0.3 08/06/2008
  *  Authors:     Hailong Xia <xhl_c@hotmail.com> 
  *  Brief  :     
  *
@@ -20,86 +20,133 @@
 #ifndef __LIBINET_UTIL_H__
 #define __LIBINET_UTIL_H__
 
-#define INET_QUEUE_HEAD(name, type)                                              \
-struct name {                                                                    \
-        struct type *qh_first;	/* first element */                              \
-        struct type **qh_last;	/* addr of last next element */                  \
+#include <cassert>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * Single List Define
+ */
+
+#define INET_LIST_HEAD(name, type)                                             \
+struct name {                                                                  \
+    struct type *first_;    /* first element */                                \
+    void* usrptr_;          /* reversed for user */                            \
+}
+ 
+#define INET_LIST_ENTRY(type)                                                  \
+struct {                                                                       \
+    struct type *next_;     /* next element */                                 \
 }
 
-#define INET_QUEUE_ENTRY(type)                                                   \
-struct {                                                                         \
-        struct type *qe_next;	/* next element */                               \
-        struct type **qe_prev;	/* address of previous next element */           \
+#define	INET_LIST_FIRST(head) ((head)->first_)
+#define	INET_LIST_END(head) NULL
+#define	INET_LIST_EMPTY(head) (INET_LIST_FIRST(head) == INET_LIST_END(head))
+#define	INET_LIST_NEXT(elm, field) ((elm)->field.next_)
+
+#define	INET_LIST_FOREACH(var, head, field)                                    \
+    for((var) = INET_LIST_FIRST(head);  (var) != INET_LIST_END(head);          \
+    (var) = INET_LIST_NEXT(var, field))
+
+#define	INET_LIST_INIT(head) {                                                 \
+    INET_LIST_FIRST(head) = INET_LIST_END(head);                               \
+    (head)->usrptr_ = NULL;                                                    \
 }
 
-#define	INET_QUEUE_FIRST(head) ((head)->qh_first)
-#define	INET_QUEUE_END(head) NULL
-#define	INET_QUEUE_NEXT(elm, field) ((elm)->field.qe_next)
-#define INET_QUEUE_LAST(head, headname)                                          \
-	(*(((struct headname *)((head)->qh_last))->qh_last))
-#define INET_QUEUE_PREV(elm, headname, field)                                    \
-        (*(((struct headname *)((elm)->field.qe_prev))->qh_last))
-#define	INET_QUEUE_EMPTY(head)                                                   \
-        (INET_QUEUE_FIRST(head) == INET_QUEUE_END(head))
-
-#define INET_QUEUE_FOREACH(var, head, field)                                     \
-        for((var) = INET_QUEUE_FIRST(head);                                      \
-            (var) != INET_QUEUE_END(head);                                       \
-            (var) = INET_QUEUE_NEXT(var, field))
-
-#define	INET_QUEUE_INIT(head) do {                                               \
-        (head)->qh_first = NULL;                                                 \
-        (head)->qh_last = &(head)->qh_first;                                     \
+#define	INET_LIST_INSERT_AFTER(slistelm, elm, field) do {                      \
+    (elm)->field.next_ = (slistelm)->field.next_;                              \
+     (slistelm)->field.next_ = (elm);                                          \
 } while (0)
 
-#define INET_QUEUE_INSERT_HEAD(head, elm, field) do {                            \
-        if (((elm)->field.qe_next = (head)->qh_first) != NULL)                   \
-                (head)->qh_first->field.tqe_prev = &(elm)->field.qe_next;        \
-        else                                                                     \
-		(head)->qh_last = &(elm)->field.qe_next;                         \
-        (head)->qh_first = (elm);                                                \
-        (elm)->field.qe_prev = &(head)->qh_first;                                \
+#define	INET_LIST_INSERT_HEAD(head, elm, field) do {                           \
+    (elm)->field.next_ = (head)->first_;                                       \
+    (head)->first_ = (elm);                                                    \
 } while (0)
 
-#define INET_QUEUE_INSERT_TAIL(head, elm, field) do {                            \
-        (elm)->field.qe_next = NULL;                                             \
-        (elm)->field.qe_prev = (head)->qh_last;                                  \
-        *(head)->qh_last = (elm);                                                \
-        (head)->qh_last = &(elm)->field.qe_next;                                 \
+#define	INET_LIST_REMOVE_HEAD(head, field) do {                                \
+    (head)->first_ = (head)->first_->field.next_;                              \
 } while (0)
 
-#define INET_QUEUE_INSERT_AFTER(head, listelm, elm, field) do {                  \
-        if (((elm)->field.qe_next = (listelm)->field.qe_next) != NULL)           \
-                (elm)->field.qe_next->field.qe_prev =	&(elm)->field.qe_next;   \
-        else                                                                     \
-                (head)->qh_last = &(elm)->field.qe_next;                         \
-        (listelm)->field.qe_next = (elm);                                        \
-        (elm)->field.qe_prev = &(listelm)->field.qe_next;                        \
+/**
+ * Double List Define
+ */
+
+#define INET_DLIST_HEAD(name, type)                                            \
+struct name {                                                                  \
+    struct type *first_;    /* first element */                                \
+    struct type **last_;    /* address of last next element */                 \
+}
+
+#define INET_DLIST_ENTRY(type)                                                 \
+struct {                                                                       \
+   struct type *next_;     /* next element */                                  \
+   struct type **prev_;    /* address of previous next element */              \
+}
+
+#define	INET_DLIST_FIRST(head) ((head)->first_)
+#define	INET_DLIST_END(head) NULL
+#define	INET_DLIST_NEXT(elm, field) ((elm)->field.next_)
+#define INET_DLIST_LAST(head, headname)                                        \
+    (*(((struct headname *)((head)->last_))->last_))
+#define INET_DLIST_PREV(elm, headname, field)                                  \
+    (*(((struct headname *)((elm)->field.prev_))->last_))
+#define	INET_DLIST_EMPTY(head)                                                 \
+    (INET_DLIST_FIRST(head) == INET_DLIST_END(head))
+
+#define INET_DLIST_FOREACH(var, head, field)                                   \
+    for((var) = INET_DLIST_FIRST(head); (var) != INET_DLIST_END(head);         \
+    (var) = INET_DLIST_NEXT(var, field))
+
+#define	INET_DLIST_INIT(head) do {                                             \
+    (head)->first_ = NULL;                                                     \
+    (head)->last_ = &(head)->first_;                                           \
 } while (0)
 
-#define	INET_QUEUE_INSERT_BEFORE(listelm, elm, field) do {                       \
-        (elm)->field.qe_prev = (listelm)->field.qe_prev;                         \
-        (elm)->field.qe_next = (listelm);                                        \
-        *(listelm)->field.qe_prev = (elm);                                       \
-        (listelm)->field.qe_prev = &(elm)->field.qe_next;                        \
+#define INET_DLIST_INSERT_HEAD(head, elm, field) do {                          \
+   if (((elm)->field.next_ = (head)->first_) != NULL)                          \
+        (head)->first_->field.tprev_ = &(elm)->field.next_;                    \
+    else                                                                       \
+        (head)->last_ = &(elm)->field.next_;                                   \
+    (head)->first_ = (elm);                                                    \
+    (elm)->field.prev_ = &(head)->first_;                                      \
 } while (0)
 
-#define INET_QUEUE_REMOVE(head, elm, field) do {                                 \
-        if (((elm)->field.qe_next) != NULL)                                      \
-                (elm)->field.qe_next->field.qe_prev =	(elm)->field.qe_prev;    \
-        else                                                                     \
-                (head)->qh_last = (elm)->field.qe_prev;                          \
-        *(elm)->field.qe_prev = (elm)->field.qe_next;                            \
+#define INET_DLIST_INSERT_TAIL(head, elm, field) do {                          \
+    (elm)->field.next_ = NULL;                                                 \
+    (elm)->field.prev_ = (head)->last_;                                        \
+    *(head)->last_ = (elm);                                                    \
+    (head)->last_ = &(elm)->field.next_;                                       \
 } while (0)
 
-#define INET_QUEUE_REPLACE(head, elm, elm2, field) do {                          \
-        if (((elm2)->field.qe_next = (elm)->field.qe_next) != NULL)              \
-                (elm2)->field.qe_next->field.qe_prev = &(elm2)->field.qe_next;   \
-        else                                                                     \
-                (head)->qh_last = &(elm2)->field.qe_next;                        \
-        (elm2)->field.qe_prev = (elm)->field.qe_prev;                            \
-        *(elm2)->field.qe_prev = (elm2);                                         \
+#define INET_DLIST_INSERT_AFTER(head, listelm, elm, field) do {                \
+    if (((elm)->field.next_ = (listelm)->field.next_) != NULL)                 \
+        (elm)->field.next_->field.prev_ = &(elm)->field.next_;                 \
+    else                                                                       \
+        (head)->last_ = &(elm)->field.next_;                                   \
+    (listelm)->field.next_ = (elm);                                            \
+    (elm)->field.prev_ = &(listelm)->field.next_;                              \
 } while (0)
+
+#define	INET_DLIST_INSERT_BEFORE(listelm, elm, field) do {                     \
+    (elm)->field.prev_ = (listelm)->field.prev_;                               \
+    (elm)->field.next_ = (listelm);                                            \
+    *(listelm)->field.prev_ = (elm);                                           \
+    (listelm)->field.prev_ = &(elm)->field.next_;                              \
+} while (0)
+
+#define INET_DLIST_REMOVE(head, elm, field) do {                               \
+    if (((elm)->field.next_) != NULL)                                          \
+        (elm)->field.next_->field.prev_ = (elm)->field.prev_;                  \
+    else                                                                       \
+        (head)->last_ = (elm)->field.prev_;                                    \
+    *(elm)->field.prev_ = (elm)->field.next_;                                  \
+} while (0)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // #ifndef __LIBINET_UTIL_H__
 

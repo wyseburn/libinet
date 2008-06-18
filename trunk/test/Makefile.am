@@ -6,7 +6,7 @@ LDADD = -linet -lboost_system-gcc41-mt-1_35
 
 noinst_PROGRAMS = testbuffer tcpclient tcpserver
 
-testbufferr_SOURCES = testbufferr.cxx 
+testbuffer_SOURCES = testbuffer.cxx 
 
 tcpserver_SOURCES = tcpserver.cxx 
 

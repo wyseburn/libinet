@@ -34,35 +34,35 @@ namespace inet
         {
             inet_uint32    off_; // valid data position for read
             inet_uint32    len_; // data length 
-            INET_QUEUE_ENTRY(node) entries_; 
+            INET_DLIST_ENTRY(node) entries_; 
             node() : off_(0), len_(0) {}
         };
 
         inet_uint32 node_data_size_;
-        INET_QUEUE_HEAD(node_que, node) data_; 
+        INET_DLIST_HEAD(node_queue, node) data_; 
         inet_uint32 cache_size_;
         inet_uint32 cache_len_;
-        INET_QUEUE_HEAD(node_cache_que, node) cache_;
+        INET_DLIST_HEAD(node_cache_queue, node) cache_;
 		
         buffer(inet_uint32 node_data_size = 4080, inet_uint32 cache_size = 5) 
             : node_data_size_(node_data_size), cache_size_(cache_size), cache_len_(0)
         {
-            INET_QUEUE_INIT(&data_);
-            INET_QUEUE_INIT(&cache_);
+            INET_DLIST_INIT(&data_);
+            INET_DLIST_INIT(&cache_);
         }
 
         ~buffer() 
         {
             buffer::node* node;
-            while (node = INET_QUEUE_FIRST(&data_))
+            while (node = INET_DLIST_FIRST(&data_))
             {
-                INET_QUEUE_REMOVE(&data_, node, entries_);
+                INET_DLIST_REMOVE(&data_, node, entries_);
                 delete node;
             }
 
-            while (node = INET_QUEUE_FIRST(&cache_))
+            while (node = INET_DLIST_FIRST(&cache_))
             {
-                INET_QUEUE_REMOVE(&cache_, node, entries_);
+                INET_DLIST_REMOVE(&cache_, node, entries_);
                 delete node;
             }
         }
@@ -81,9 +81,9 @@ namespace inet
                 return new (node) buffer::node();
             }
 				
-            node = INET_QUEUE_FIRST(&cache_);
+            node = INET_DLIST_FIRST(&cache_);
             assert(node); 
-            INET_QUEUE_REMOVE(&cache_, node, entries_);
+            INET_DLIST_REMOVE(&cache_, node, entries_);
             cache_len_--;
             return new (node) buffer::node();
         }
@@ -96,7 +96,7 @@ namespace inet
                 delete node;
                 return;
             }
-            INET_QUEUE_INSERT_TAIL(&cache_, node, entries_);
+            INET_DLIST_INSERT_TAIL(&cache_, node, entries_);
             cache_len_++;
         }
 
@@ -106,15 +106,15 @@ namespace inet
         void push_node(buffer::node* node)
         {
             assert(node);
-            INET_QUEUE_INSERT_TAIL(&data_, node, entries_);
+            INET_DLIST_INSERT_TAIL(&data_, node, entries_);
         }
 
         buffer::node* pop_node()
         {
-            buffer::node* node = INET_QUEUE_FIRST(&data_);
+            buffer::node* node = INET_DLIST_FIRST(&data_);
             if (node)
             {
-                INET_QUEUE_REMOVE(&data_, node, entries_);
+                INET_DLIST_REMOVE(&data_, node, entries_);
             }
             return node;
         }
@@ -123,7 +123,7 @@ namespace inet
         {
             inet_uint32 length = 0;
             buffer::node* node;
-            INET_QUEUE_FOREACH(node, &data_, entries_)
+            INET_DLIST_FOREACH(node, &data_, entries_)
             {
                 length += node->len_;
             }
@@ -132,12 +132,12 @@ namespace inet
 
         void drain(inet_uint32 nbytes)
         {
-            buffer::node* node = INET_QUEUE_FIRST(&data_);
+            buffer::node* node = INET_DLIST_FIRST(&data_);
             while (node && nbytes > 0 && nbytes >= node->len_)
             {
                 nbytes -= node->len_;
-                buffer::node* tmp = INET_QUEUE_NEXT(node, entries_);
-                INET_QUEUE_REMOVE(&data_, node, entries_);
+                buffer::node* tmp = INET_DLIST_NEXT(node, entries_);
+                INET_DLIST_REMOVE(&data_, node, entries_);
                 dealloc_node(node);
                 node = tmp;
             }
@@ -154,7 +154,7 @@ namespace inet
          */
         inet_uint32 read(void* buf, inet_uint32 nbytes)
         {
-            buffer::node* node = INET_QUEUE_FIRST(&data_);
+            buffer::node* node = INET_DLIST_FIRST(&data_);
             if (nbytes <= node->len_)
             {
                 memcpy(buf, (char *)node + sizeof(buffer::node) + node->off_, nbytes);
@@ -162,7 +162,7 @@ namespace inet
                 node->len_ -= nbytes;
                 if (node->len_ == 0)
                 {
-                    INET_QUEUE_REMOVE(&data_, node, entries_);
+                    INET_DLIST_REMOVE(&data_, node, entries_);
                     dealloc_node(node);
                 }
                 return nbytes;
@@ -173,8 +173,8 @@ namespace inet
             {
                 if (node->len_ == 0)
                 {
-                    buffer::node* tmp = INET_QUEUE_NEXT(node, entries_);
-                    INET_QUEUE_REMOVE(&data_, node, entries_);
+                    buffer::node* tmp = INET_DLIST_NEXT(node, entries_);
+                    INET_DLIST_REMOVE(&data_, node, entries_);
                     dealloc_node(node);
                     node = tmp;
                     continue;
@@ -193,7 +193,7 @@ namespace inet
          */
         inet_uint32 read(buffer& buf, inet_uint32 nbytes)
         {
-            buffer::node* node = INET_QUEUE_FIRST(&data_);
+            buffer::node* node = INET_DLIST_FIRST(&data_);
             if (nbytes <= node->len_)
             {
                 buf.write((char *)node + sizeof(buffer::node) + node->off_, nbytes); 
@@ -201,7 +201,7 @@ namespace inet
                 node->len_ -= nbytes;
                 if (node->len_ == 0)
                 {
-                    INET_QUEUE_REMOVE(&data_, node, entries_);
+                    INET_DLIST_REMOVE(&data_, node, entries_);
                     dealloc_node(node);
                 }
                 return nbytes;
@@ -212,8 +212,8 @@ namespace inet
             {
                 if (node->len_ == 0)
                 {
-                    buffer::node* tmp = INET_QUEUE_NEXT(node, entries_);
-                    INET_QUEUE_REMOVE(&data_, node, entries_);
+                    buffer::node* tmp = INET_DLIST_NEXT(node, entries_);
+                    INET_DLIST_REMOVE(&data_, node, entries_);
                     dealloc_node(node);
                     node = tmp;
                     continue;
@@ -239,11 +239,11 @@ namespace inet
         void write(const inet_int8* src, inet_uint32 nbytes)
         {
             assert(src);
-            buffer::node* node = INET_QUEUE_LAST(&data_, node_que);
+            buffer::node* node = INET_DLIST_LAST(&data_, node_queue);
             if (node == NULL || node->off_ + node->len_ == node_data_size_)
             {
                 push_node(alloc_node());
-                node = INET_QUEUE_LAST(&data_, node_que);
+                node = INET_DLIST_LAST(&data_, node_queue);
             }
 
             if (node->off_ + node->len_ + nbytes <= node_data_size_)
@@ -268,9 +268,9 @@ namespace inet
         buffer& operator = (buffer& other)
         {
             buffer::node* node;
-            while (node = INET_QUEUE_FIRST(&data_))
+            while (node = INET_DLIST_FIRST(&data_))
             {
-                INET_QUEUE_REMOVE(&data_, node, entries_);
+                INET_DLIST_REMOVE(&data_, node, entries_);
                 dealloc_node(node);
             }
             this->operator += (other);
@@ -283,7 +283,7 @@ namespace inet
         buffer& operator += (buffer& other)
         {
             buffer::node* node;
-            INET_QUEUE_FOREACH(node, &other.data_, entries_)
+            INET_DLIST_FOREACH(node, &other.data_, entries_)
             {
                 write((const inet_int8 *)((char *)node + sizeof(buffer::node) + node->off_), node->len_);
             }
@@ -297,9 +297,9 @@ namespace inet
         {
             value += *this;
             buffer::node* node;
-            while (node = INET_QUEUE_FIRST(&data_))
+            while (node = INET_DLIST_FIRST(&data_))
             {
-                INET_QUEUE_REMOVE(&data_, node, entries_);
+                INET_DLIST_REMOVE(&data_, node, entries_);
                 delete node;
             }
         }
@@ -477,7 +477,7 @@ namespace inet
         buffer& operator >> (std::string& value)
         {
             value.clear();
-            buffer::node* node = INET_QUEUE_FIRST(&data_);
+            buffer::node* node = INET_DLIST_FIRST(&data_);
             while (node)
             {
                 inet_int8 c = read<inet_int8>();
@@ -504,7 +504,7 @@ namespace inet
         buffer& operator >> (std::wstring& value)
         {
             value.clear();
-            buffer::node* node = INET_QUEUE_FIRST(&data_);
+            buffer::node* node = INET_DLIST_FIRST(&data_);
             while (node)
             {
                 inet_uint16 c = read<inet_uint16>();

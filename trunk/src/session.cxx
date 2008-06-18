@@ -35,6 +35,7 @@ namespace inet
         session_impl(inet::session* wrapper, inet::service& service, inet::transport transport) 
             : wrapper_(wrapper), service_(service), transport_(transport)
             , pending_recv_request_count_(0), pending_send_request_count_(0)
+            , strand_(*(io_service *)service.get())
         {
             if (transport == inet::tcp)
             {
@@ -64,8 +65,8 @@ namespace inet
                 ip::tcp::resolver::iterator last;
                 assert(endpoint != last);
 
-                socket_->async_connect(*endpoint, boost::bind(&session_impl::on_connected,
-                    this, remote, port, asio::placeholders::error));
+                socket_->async_connect(*endpoint, strand_.wrap(boost::bind(&session_impl::on_connected,
+                    this, remote, port, asio::placeholders::error)));
             }
             return true;
         }
@@ -79,7 +80,7 @@ namespace inet
                 {
                     asio::async_write(*(ip::tcp::socket *)socket_.get(), 
                         asio::buffer((char *)node + sizeof(inet::buffer::node), node->len_),
-                        boost::bind(&session_impl::on_sent, this, node, asio::placeholders::error));
+                        strand_.wrap(boost::bind(&session_impl::on_sent, this, node, asio::placeholders::error)));
                     pending_send_request_count_++;
                 }
             }
@@ -159,8 +160,8 @@ namespace inet
                 inet::buffer::node* node = wrapper_->recv_buffer_.alloc_node();
                 socket_->async_receive(asio::buffer((char *)node + sizeof(inet::buffer::node), 
                     wrapper_->recv_buffer_.node_data_size_),
-                    boost::bind(&session_impl::on_received, this,
-                    asio::placeholders::bytes_transferred, node, asio::placeholders::error));
+                    strand_.wrap(boost::bind(&session_impl::on_received, this,
+                    asio::placeholders::bytes_transferred, node, asio::placeholders::error)));
                 pending_recv_request_count_++;
             }
         }
@@ -172,6 +173,7 @@ namespace inet
         inet::transport transport_;
         inet_uint32 pending_recv_request_count_;
         inet_uint32 pending_send_request_count_;
+        boost::asio::strand strand_;
     };
 }
 

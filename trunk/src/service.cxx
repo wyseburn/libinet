@@ -56,9 +56,23 @@ inet::service::poll()
 }
 
 inet_uint32
+inet::service::poll_one()
+{
+    assert(impl_);
+    return (inet_uint32)impl_->service_.poll_one();
+}
+
+inet_uint32
 inet::service::run()
 {
     assert(impl_);
     return (inet_uint32)impl_->service_.run();
+}
+
+inet_uint32
+inet::service::run_one()
+{
+    assert(impl_);
+    return (inet_uint32)impl_->service_.run_one();
 }
 

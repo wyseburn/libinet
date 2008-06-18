@@ -33,7 +33,9 @@ namespace inet
 
         void* get();
         inet_uint32 poll();
+        inet_uint32 poll_one();
         inet_uint32 run();
+        inet_uint32 run_one();
 
     private:
         service_impl* impl_; 
