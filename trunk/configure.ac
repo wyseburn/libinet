@@ -45,5 +45,5 @@ AC_ARG_ENABLE(almost-static,
 AC_MSG_RESULT($build_almost_static)
 
 # Write generated configuration file
-AC_OUTPUT(Makefile  src/Makefile example/Makefile)
+AC_OUTPUT(Makefile  src/Makefile example/Makefile test/Makefile)
 
