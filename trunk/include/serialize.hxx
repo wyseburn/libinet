@@ -46,14 +46,14 @@ namespace inet
     };
 
     template <class Type>
-    struct s11n_traits<Type, typename enableif<is_integer<Type >::value >::type >
+    struct s11n_traits<Type, typename enableif<is_integer<Type >::value>::type>
     {
         static inet_uint32 s11n_size() { return sizeof(Type); }
         static inet_uint32 s11n_size(const Type& instance) { return sizeof(instance); }
 
         static void s11n(const Type& instance, inet::buffer& buffer)
         {
-            buffer << (Type)(byte_convert<Type>::hton(instance));
+            buffer << byte_convert<Type>::hton(instance);
         }
 
         static bool uns11n(Type& instance, inet::buffer& buffer)
@@ -67,7 +67,40 @@ namespace inet
     };
 
     template <class Type>
-    struct s11n_traits<Type, typename enableif<is_std_pair<Type >::value >::type >
+    struct s11n_traits<Type, typename enableif<is_std_basic_string<Type >::value>::type>
+    {
+        typedef typename Type::value_type elem_type;
+
+        static inet_uint32 s11n_size(const Type& instance)
+        {
+            inet_uint32 size = sizeof(inet_uint32);
+            size += instance.size();
+            return size;
+        }
+
+        static void s11n(const Type& instance, inet::buffer& buffer)
+        {
+            buffer << byte_convert<inet_uint32>::hton(instance.size());
+            buffer << instance.c_str();
+        }
+
+        static bool uns11n(Type& instance, inet::buffer& buffer)
+        {
+            if (buffer.length() < sizeof(inet_uint32))
+                return false;
+
+            inet_uint32 size = 0;
+            buffer >> size;
+            size = byte_convert<inet_uint32>::ntoh(size);
+
+            if (buffer.length() < size) return false;
+            buffer >> instance; // performance ???
+            return true;
+        }
+    };
+
+    template <class Type>
+    struct s11n_traits<Type, typename enableif<is_std_pair<Type >::value>::type>
     {
         typedef typename Type::first_type first_type;
         typedef typename Type::second_type second_type;
@@ -75,7 +108,7 @@ namespace inet
         static inet_uint32 s11n_size(const Type& instance)
         {
             return s11n_traits<first_type >::s11n_size(instance.first) +
-                   s11n_traits<second_type >::s11n_size(instance.second);
+                s11n_traits<second_type >::s11n_size(instance.second);
         }
 
         static void s11n(const Type& instance, inet::buffer& buffer)
@@ -92,29 +125,24 @@ namespace inet
     };
 
     template <class Type>
-    struct s11n_traits<Type, typename enableif<is_std_container<Type >::value >::type >
+    struct s11n_traits<Type, typename enableif<is_std_container<Type >::value>::type>
     {
         typedef typename Type::value_type elem_type;
         typedef typename Type::const_iterator iterator_type;
 
         static inet_uint32 s11n_size(const Type& instance)
         {
-            inet_uint32 size = s11n_traits<inet_uint32>::s11n_size();
-            
+            inet_uint32 size = s11n_traits<inet_uint32>::s11n_size(); 
             for (iterator_type it = instance.begin(); it != instance.end(); ++it)
-            {
                 size += s11n_traits<elem_type >::s11n_size(*it);
-            }
             return size;
         }
 
         static void s11n(const Type& instance, inet::buffer& buffer)
         {
-            buffer << (inet_uint32)byte_convert<inet_uint32>::hton(instance.size());
+            buffer << byte_convert<inet_uint32>::hton(instance.size());
             for (iterator_type it = instance.begin(); it != instance.end(); ++it)
-            {
                 s11n_traits<elem_type >::s11n(*it, buffer);
-            }
         }
 
         static bool uns11n(Type& instance, inet::buffer& buffer)
@@ -127,10 +155,9 @@ namespace inet
             {
                 elem_type elem;
                 if (!s11n_traits<elem_type >::uns11n(elem, buffer))
-                {
                     return false;
-                }
-                instance.push_back(elem);
+                instance.insert(instance.end(), elem);
+                //instance.push_back(elem);
             }
             return true;
         }
@@ -148,7 +175,6 @@ namespace inet
         s11n_traits<Type >::s11n((Type&)instance, buffer);
         return true;
     }
-
     
     template <class Type>
     static bool unserialize(Type& instance, inet::buffer& buffer)

@@ -461,6 +461,18 @@ namespace inet
             return *this; 
         }
 
+        buffer& operator << (const wchar_t& value)
+        {
+            write<wchar_t>((wchar_t)value); 
+            return *this;
+        }
+
+        buffer& operator >> (wchar_t& value)
+        {
+            value = read<wchar_t>();
+            return *this;
+        }
+
         buffer& operator << (const std::string& value)
         {
             write((inet_int8 const *)value.c_str(), (inet_uint32)value.length());

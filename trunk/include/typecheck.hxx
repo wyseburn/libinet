@@ -25,7 +25,7 @@
 namespace std // std type declared
 {
     template <class FirstType, class SecondType> struct pair;
-    template <class Type, class Traits, class AllocatorType> class basic_string;
+    template <class Type, class Traits, class AllocatorType> class basic_string;;
     template <class Type, class AllocatorType> class vector;
     template <class Type, class AllocatorType> class deque;
     template <class Type, class AllocatorType> class list;
@@ -45,6 +45,7 @@ namespace inet
     template <> struct is_integer<bool> { static const bool value = true; };
     template <> struct is_integer<long> { static const bool value = true; };
     template <> struct is_integer<unsigned long> { static const bool value = true; };
+    template <> struct is_integer<wchar_t> { static const bool value = true; };
     template <> struct is_integer<inet_int8> { static const bool value = true; };
     template <> struct is_integer<inet_int16> { static const bool value = true; };
     template <> struct is_integer<inet_int32> { static const bool value = true; };
@@ -53,7 +54,7 @@ namespace inet
     template <> struct is_integer<inet_uint16> { static const bool value = true; };
     template <> struct is_integer<inet_uint32> { static const bool value = true; };
     template <> struct is_integer<inet_uint64> { static const bool value = true; };
-
+    
     template <class Type> struct is_std_pair { static const bool value = false; };
     template <class FirstType, class SecondType> 
     struct is_std_pair<std::pair<FirstType, SecondType> > 
@@ -106,18 +107,26 @@ namespace inet
     struct is_std_multimap<std::multimap<KeyType, MappedType, CompType, AllocatorType> >
     { static const bool value = true; };
 
+    //template <class Type, class Enable = void>
+    //struct is_std_sequence_container { static const bool value = false; }; 
+    //template <class Type> struct is_std_sequence_container<Type, 
+    //typename enableif<is_std_vector<Type>::value || is_std_list<Type>::value || 
+    //is_std_deque<Type>::value || is_std_basic_string<Type>::value>::type>
+    //{ static const bool value = true; };
+
+    // Due to improve string copy performance, we aren't conside std::string is a container.
     template <class Type, class Enable = void>
     struct is_std_sequence_container { static const bool value = false; }; 
     template <class Type> struct is_std_sequence_container<Type, 
     typename enableif<is_std_vector<Type>::value || is_std_list<Type>::value || 
-    is_std_deque<Type>::value || is_std_basic_string<Type>::value>::type>
+    is_std_deque<Type>::value>::type>
     { static const bool value = true; };
 
     template <class Type, class Enable = void>
     struct is_std_associative_container { static const bool value = false; };
     template <class Type> struct is_std_associative_container<Type, 
     typename enableif<is_std_set<Type>::value || is_std_multiset<Type>::value || 
-    is_std_set<Type>::value || is_std_multiset<Type>::value>::type>
+    is_std_map<Type>::value || is_std_multimap<Type>::value>::type>
     { static const bool value = true; };
 
     template <class Type, class Enable = void>
