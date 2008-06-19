@@ -1,6 +1,6 @@
 /**
  *  Version:     @(#)libinet/session.cxx    0.0.1 25/05/2008
- *  Authors:     Hailong Xia <hlxxxx@gmail.com> 
+ *  Authors:     Hailong Xia <xhl_c@hotmail.com> 
  *  Brief  :     Session implement class by boost::asio. 
  *
  *  This library is free software; you can redistribute it and/or modify it under 
@@ -63,7 +63,7 @@ namespace inet
                 ip::tcp::resolver::iterator endpoint(resolver.resolve(ip::tcp::resolver::query((const char *)remote, 
                     boost::lexical_cast<std::string>(port))));
                 ip::tcp::resolver::iterator last;
-                assert(endpoint != last);
+                assert(last != endpoint);
 
                 socket_->async_connect(*endpoint, strand_.wrap(boost::bind(&session_impl::on_connected,
                     this, remote, port, asio::placeholders::error)));
@@ -144,7 +144,7 @@ namespace inet
             } 
             else 
             {
-                if (!wrapper_->on_sent_.IsEmpty())
+                if (!wrapper_->on_sent_.empty())
                 {
                      wrapper_->on_sent_(wrapper_, 
                          (const void *)((char *)node + sizeof(buffer::node)), node->len_);

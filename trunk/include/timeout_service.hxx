@@ -1,5 +1,5 @@
 /**
- *  Version:     @(#)libinet/timeout_service.hxx    0.0.1 19/06/2008
+ *  Version:     @(#)libinet/timeout_service.hxx    0.0.2 19/06/2008
  *  Authors:     Hailong Xia <xhl_c@hotmail.com> 
  *  Brief  :     
  *
@@ -30,7 +30,7 @@
 
 namespace inet
 {
-    typedef Delegate<void (void* /*args */)> TIMEOUT_EVENT_CB;
+    typedef delegate<void (void* /*args */)> TIMEOUT_EVENT_CB;
     template <inet_uint32 MaxTimeoutTime/*millisecond*/, inet_uint32 Precision/*millisecond*/>
     class timeout_service
     {
@@ -75,7 +75,7 @@ namespace inet
 
         bool regist(inet_uint32 duration/*millisecond*/, const TIMEOUT_EVENT_CB& cb, void* args)
         {
-            if (duration <= 0 || duration > MaxTimeoutTime || cb.IsEmpty())
+            if (duration <= 0 || duration > MaxTimeoutTime || cb.empty())
                 return false;
 
             inet_int32 index = (duration % Precision) ? 
@@ -85,7 +85,7 @@ namespace inet
             if (index < 0) index = 0;
 
             struct handler* handler = alloc_handler();
-            handler->cb_ = cb; 
+            if (!handler->cb_.exist(cb)) handler->cb_ = cb; 
             handler->args_ = args;
 
             if (handlers_[index].usrptr_ == NULL)

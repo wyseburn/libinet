@@ -26,27 +26,27 @@
 
 
 #define INET_REGISTER_CONNECTED(session, obj, func) \
-    (session)->on_connected_ += inet::CONN_EVENT_CB(obj, func)
+    (session)->on_connected_ += std::make_pair(obj, func)
 
 #define INET_REGISTER_CONNECT_FAILED(session, obj, func) \
-    (session)->on_connect_failed_ += inet::CONN_EVENT_CB(obj, func)
+    (session)->on_connect_failed_ += std::make_pair(obj, func)
 
 #define INET_REGISTER_CONNECT_BROKEN(session, obj, func) \
-    (session)->on_connect_broken_ += inet::CONN_EVENT_CB(obj, func)
+    (session)->on_connect_broken_ += std::make_pair(obj, func)
 
 #define INET_REGISTER_RECEIVED(session, obj, func) \
-    (session)->on_received_ += inet::RECV_EVENT_CB(obj, func)
+    (session)->on_received_ += std::make_pair(obj, func)
 
 #define INET_REGISTER_SENT(session, obj, func) \
-    (session)->on_sent_ += inet::SEND_EVENT_CB(obj, func)
+    (session)->on_sent_ += std::make_pair(obj, func)
 
 namespace inet
 {
     class session;
     typedef enum { icmp = 0, udp, tcp } transport;
-    typedef Delegate<void (session*, buffer&/*istream*/, buffer&/*ostream*/)> CONN_EVENT_CB;
-    typedef Delegate<void (session*, buffer&/*istream*/, buffer&/*ostream*/)> RECV_EVENT_CB;
-    typedef Delegate<void (session*, const void* /*buffer*/, inet_uint32/*buffer length*/)> SEND_EVENT_CB;
+    typedef delegate<void (session*, buffer&/*istream*/, buffer&/*ostream*/)> CONN_EVENT_CB;
+    typedef delegate<void (session*, buffer&/*istream*/, buffer&/*ostream*/)> RECV_EVENT_CB;
+    typedef delegate<void (session*, const void* /*buffer*/, inet_uint32/*buffer length*/)> SEND_EVENT_CB;
 
     class session_impl;
     class session

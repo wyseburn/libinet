@@ -1,5 +1,5 @@
 /**
- *  Version:     @(#)libinet/buffer.hxx    0.1.0 04/06/2008
+ *  Version:     @(#)libinet/buffer.hxx    0.1.2 04/06/2008
  *  Authors:     Hailong Xia <xhl_c@hotmail.com> 
  *  Brief  :     
  *
@@ -155,7 +155,7 @@ namespace inet
         inet_uint32 read(void* buf, inet_uint32 nbytes)
         {
             buffer::node* node = INET_DLIST_FIRST(&data_);
-            if (nbytes <= node->len_)
+            if (node && nbytes <= node->len_)
             {
                 memcpy(buf, (char *)node + sizeof(buffer::node) + node->off_, nbytes);
                 node->off_ += nbytes;
@@ -194,7 +194,7 @@ namespace inet
         inet_uint32 read(buffer& buf, inet_uint32 nbytes)
         {
             buffer::node* node = INET_DLIST_FIRST(&data_);
-            if (nbytes <= node->len_)
+            if (node && nbytes <= node->len_)
             {
                 buf.write((char *)node + sizeof(buffer::node) + node->off_, nbytes); 
                 node->off_ += nbytes;
@@ -302,6 +302,7 @@ namespace inet
                 INET_DLIST_REMOVE(&data_, node, entries_);
                 delete node;
             }
+            return *this;
         }
 
         buffer& operator << (bool value) 

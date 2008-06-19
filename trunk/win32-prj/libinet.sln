@@ -1,0 +1,101 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libinet_static", "libinet_static.vcproj", "{8C1924AC-E3B9-4571-832E-F7EE51772866}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "buffer", "buffer.vcproj", "{C80C22A9-9C2D-4FDE-9A3E-EA52E1463660}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8C1924AC-E3B9-4571-832E-F7EE51772866} = {8C1924AC-E3B9-4571-832E-F7EE51772866}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "delegate", "delegate.vcproj", "{47302116-A648-499C-8C11-A085041D9045}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8C1924AC-E3B9-4571-832E-F7EE51772866} = {8C1924AC-E3B9-4571-832E-F7EE51772866}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "serialize", "serialize.vcproj", "{A04ED04C-3ED2-4E91-9050-9534A92C310B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8C1924AC-E3B9-4571-832E-F7EE51772866} = {8C1924AC-E3B9-4571-832E-F7EE51772866}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tcpechoclient", "tcpechoclient.vcproj", "{FCD1E14C-AC19-4ECF-9C16-0FCA069F1938}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8C1924AC-E3B9-4571-832E-F7EE51772866} = {8C1924AC-E3B9-4571-832E-F7EE51772866}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tcpechoserver", "tcpechoserver.vcproj", "{74E59F0B-0ED0-455E-94D7-B2100BFC3329}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8C1924AC-E3B9-4571-832E-F7EE51772866} = {8C1924AC-E3B9-4571-832E-F7EE51772866}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tcptimeclient", "tcptimeclient.vcproj", "{267BB182-57A2-41F5-A840-E2EA37DB464C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8C1924AC-E3B9-4571-832E-F7EE51772866} = {8C1924AC-E3B9-4571-832E-F7EE51772866}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tcptimeserver", "tcptimeserver.vcproj", "{350F9B16-754B-4EF6-843D-98B255E542BB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8C1924AC-E3B9-4571-832E-F7EE51772866} = {8C1924AC-E3B9-4571-832E-F7EE51772866}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "timeout_service", "timeout_service.vcproj", "{45EA36AF-0440-4A51-ADC9-F09D0773B8A7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8C1924AC-E3B9-4571-832E-F7EE51772866} = {8C1924AC-E3B9-4571-832E-F7EE51772866}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "timer", "timer.vcproj", "{3A23B20E-7501-472D-94C1-F6E0C66D2244}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8C1924AC-E3B9-4571-832E-F7EE51772866} = {8C1924AC-E3B9-4571-832E-F7EE51772866}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8C1924AC-E3B9-4571-832E-F7EE51772866}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8C1924AC-E3B9-4571-832E-F7EE51772866}.Debug|Win32.Build.0 = Debug|Win32
+		{8C1924AC-E3B9-4571-832E-F7EE51772866}.Release|Win32.ActiveCfg = Release|Win32
+		{8C1924AC-E3B9-4571-832E-F7EE51772866}.Release|Win32.Build.0 = Release|Win32
+		{C80C22A9-9C2D-4FDE-9A3E-EA52E1463660}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C80C22A9-9C2D-4FDE-9A3E-EA52E1463660}.Debug|Win32.Build.0 = Debug|Win32
+		{C80C22A9-9C2D-4FDE-9A3E-EA52E1463660}.Release|Win32.ActiveCfg = Release|Win32
+		{C80C22A9-9C2D-4FDE-9A3E-EA52E1463660}.Release|Win32.Build.0 = Release|Win32
+		{47302116-A648-499C-8C11-A085041D9045}.Debug|Win32.ActiveCfg = Debug|Win32
+		{47302116-A648-499C-8C11-A085041D9045}.Debug|Win32.Build.0 = Debug|Win32
+		{47302116-A648-499C-8C11-A085041D9045}.Release|Win32.ActiveCfg = Release|Win32
+		{47302116-A648-499C-8C11-A085041D9045}.Release|Win32.Build.0 = Release|Win32
+		{A04ED04C-3ED2-4E91-9050-9534A92C310B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A04ED04C-3ED2-4E91-9050-9534A92C310B}.Debug|Win32.Build.0 = Debug|Win32
+		{A04ED04C-3ED2-4E91-9050-9534A92C310B}.Release|Win32.ActiveCfg = Release|Win32
+		{A04ED04C-3ED2-4E91-9050-9534A92C310B}.Release|Win32.Build.0 = Release|Win32
+		{FCD1E14C-AC19-4ECF-9C16-0FCA069F1938}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FCD1E14C-AC19-4ECF-9C16-0FCA069F1938}.Debug|Win32.Build.0 = Debug|Win32
+		{FCD1E14C-AC19-4ECF-9C16-0FCA069F1938}.Release|Win32.ActiveCfg = Release|Win32
+		{FCD1E14C-AC19-4ECF-9C16-0FCA069F1938}.Release|Win32.Build.0 = Release|Win32
+		{74E59F0B-0ED0-455E-94D7-B2100BFC3329}.Debug|Win32.ActiveCfg = Debug|Win32
+		{74E59F0B-0ED0-455E-94D7-B2100BFC3329}.Debug|Win32.Build.0 = Debug|Win32
+		{74E59F0B-0ED0-455E-94D7-B2100BFC3329}.Release|Win32.ActiveCfg = Release|Win32
+		{74E59F0B-0ED0-455E-94D7-B2100BFC3329}.Release|Win32.Build.0 = Release|Win32
+		{267BB182-57A2-41F5-A840-E2EA37DB464C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{267BB182-57A2-41F5-A840-E2EA37DB464C}.Debug|Win32.Build.0 = Debug|Win32
+		{267BB182-57A2-41F5-A840-E2EA37DB464C}.Release|Win32.ActiveCfg = Release|Win32
+		{267BB182-57A2-41F5-A840-E2EA37DB464C}.Release|Win32.Build.0 = Release|Win32
+		{350F9B16-754B-4EF6-843D-98B255E542BB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{350F9B16-754B-4EF6-843D-98B255E542BB}.Debug|Win32.Build.0 = Debug|Win32
+		{350F9B16-754B-4EF6-843D-98B255E542BB}.Release|Win32.ActiveCfg = Release|Win32
+		{350F9B16-754B-4EF6-843D-98B255E542BB}.Release|Win32.Build.0 = Release|Win32
+		{45EA36AF-0440-4A51-ADC9-F09D0773B8A7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{45EA36AF-0440-4A51-ADC9-F09D0773B8A7}.Debug|Win32.Build.0 = Debug|Win32
+		{45EA36AF-0440-4A51-ADC9-F09D0773B8A7}.Release|Win32.ActiveCfg = Release|Win32
+		{45EA36AF-0440-4A51-ADC9-F09D0773B8A7}.Release|Win32.Build.0 = Release|Win32
+		{3A23B20E-7501-472D-94C1-F6E0C66D2244}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3A23B20E-7501-472D-94C1-F6E0C66D2244}.Debug|Win32.Build.0 = Debug|Win32
+		{3A23B20E-7501-472D-94C1-F6E0C66D2244}.Release|Win32.ActiveCfg = Release|Win32
+		{3A23B20E-7501-472D-94C1-F6E0C66D2244}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

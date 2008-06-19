@@ -20,21 +20,71 @@
 #ifndef __LIBINET_BYTE_ORDER_H__
 #define __LIBINET_BYTE_ORDER_H__
 
-#define INET_HTON2 (value) ((((value) << 8) & 0xff00) | (((value) >> 8) & 0x00ff))
+#if defined (_WIN32)
+# include <winsock2.h>
+# elif defined (__linux__) || defined (__FreeBSD__)
+# include <arpa/inet.h>
+#endif
 
+#include "compat.hxx"
 
-#define INET_HTON4 (value) ((((value) << 24) & 0xff000000) \
-                           |(((value) << 8 ) & 0x00ff0000) \
-                           |(((value) >> 8 ) & 0x0000ff00) \
-                           |(((value) >> 24) & 0x000000ff) )
+namespace inet
+{
+    template <typename Type> 
+    class byte_convert
+    {
+    public:
+        inline static Type hton(Type val) { return val; }
+        inline static Type ntoh(Type val) { return val; }
+    };
 
-#define INET_HTON8 (value) ((((value) << 56) & 0xff00000000000000ull) \
-                           |(((value) << 40) & 0x00ff000000000000ull) \
-                           |(((value) << 24) & 0x0000ff0000000000ull) \
-                           |(((value) << 8 ) & 0x000000ff00000000ull) \
-                           |(((value) >> 8 ) & 0x00000000ff000000ull) \
-                           |(((value) >> 24) & 0x0000000000ff0000ull) \
-                           |(((value) >> 40) & 0x000000000000ff00ull) \
-                           |(((value) >> 56) & 0x00000000000000ffull) ) 
+    template <>
+    inline inet_int16 byte_convert<inet_int16>::hton(inet_int16 hs)
+    {
+        return (inet_int16)htons((inet_uint16)hs);
+    }
+
+    template <>
+    inline inet_int16 byte_convert<inet_int16>::ntoh(inet_int16 ns)
+    {
+        return (inet_int16)ntohs((inet_uint16)ns);
+    }
+
+    template <>
+    inline inet_uint16 byte_convert<inet_uint16>::hton(inet_uint16 hs)
+    {
+        return (inet_uint16)htons(hs);
+    }
+
+    template <>
+    inline inet_uint16 byte_convert<inet_uint16>::ntoh(inet_uint16 ns)
+    {
+        return (inet_uint16)ntohs(ns);
+    }
+
+    template <>
+    inline inet_int32 byte_convert<inet_int32>::hton(inet_int32 hl)
+    {
+        return (inet_int32)htonl((inet_uint32)hl);
+    }
+
+    template <>
+    inline inet_int32 byte_convert<inet_int32>::ntoh(inet_int32 nl)
+    {
+        return (inet_int32)ntohl((inet_uint32)nl);
+    }
+
+    template <>
+    inline inet_uint32 byte_convert<inet_uint32>::hton(inet_uint32 hl)
+    {
+        return (inet_uint32)htonl(hl);
+    }
+
+    template <>
+    inline inet_uint32 byte_convert<inet_uint32>::ntoh(inet_uint32 nl)
+    {
+        return (inet_uint32)ntohl(nl);
+    }
+} // namesapce
                            
 #endif // #ifndef __LIBINET_BYTE_ORDER_H__

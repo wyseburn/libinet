@@ -24,11 +24,11 @@
 #include "session.hxx"
 
 #define INET_REGISTER_ACCEPTED(listener, obj, func) \
-    (listener)->on_accepted_ += inet::ACCEPT_EVENT(obj, func)
+    (listener)->on_accepted_ += std::make_pair(obj, func)
 
 namespace inet
 {
-    typedef Delegate<void (session*, buffer&/*istream*/, buffer&/*ostream*/)> ACCEPT_EVENT;
+    typedef delegate<void (session*, buffer&/*istream*/, buffer&/*ostream*/)> ACCEPT_EVENT;
     class listener_impl;
     class listener
     {

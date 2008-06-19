@@ -1,7 +1,7 @@
 /**
  *  Version:    @(#)libinet/delegate.hxx    0.0.1 23/05/2008
  *  Authors:    Hailong Xia <xhl_c@hotmail.com> 
- *  Brief  :    Copy from boost project. 
+ *  Brief  :    
  *
  *  This library is free software; you can redistribute it and/or modify it under 
  *  the terms of the GNU Lesser General Public License as published by the Free 
@@ -48,45 +48,45 @@
 
 namespace inet 
 {
-    class InvalidOperationException : public std::runtime_error
+    class invalid_operation_exception : public std::runtime_error
     {
     public:
-        InvalidOperationException() : std::runtime_error("Invalidate operation") {}
-        virtual ~InvalidOperationException() throw() {}
+        invalid_operation_exception() : std::runtime_error("Invalidate operation") {}
+        virtual ~invalid_operation_exception() throw() {}
     };
 
     template <class TSignature>
-    class Delegate; // no body
+    class delegate; // no body
 }
 
 #pragma warning(push)
 #pragma warning(disable: 4715)
 
-#define INET_DELEGATE_NUM_ARGS	0 // Delegate<R ()>
+#define INET_DELEGATE_NUM_ARGS	0 // delegate<R ()>
 #include "delegate_template.hxx"
 #undef INET_DELEGATE_NUM_ARGS
 
-#define INET_DELEGATE_NUM_ARGS	1 // Delegate<R (T1)>
+#define INET_DELEGATE_NUM_ARGS	1 // delegate<R (T1)>
 #include "delegate_template.hxx"
 #undef INET_DELEGATE_NUM_ARGS
 
-#define INET_DELEGATE_NUM_ARGS	2 // Delegate<R (T1, T2)>
+#define INET_DELEGATE_NUM_ARGS	2 // delegate<R (T1, T2)>
 #include "delegate_template.hxx"
 #undef INET_DELEGATE_NUM_ARGS
 
-#define INET_DELEGATE_NUM_ARGS	3 // Delegate<R (T1, T2, T3)>
+#define INET_DELEGATE_NUM_ARGS	3 // delegate<R (T1, T2, T3)>
 #include "delegate_template.hxx"
 #undef INET_DELEGATE_NUM_ARGS
 
-#define INET_DELEGATE_NUM_ARGS	4 // Delegate<R (T1, T2, T3, T4)>
+#define INET_DELEGATE_NUM_ARGS	4 // delegate<R (T1, T2, T3, T4)>
 #include "delegate_template.hxx"
 #undef INET_DELEGATE_NUM_ARGS
 
-#define INET_DELEGATE_NUM_ARGS	5 // Delegate<R (T1, T2, T3, T4, T5)>
+#define INET_DELEGATE_NUM_ARGS	5 // delegate<R (T1, T2, T3, T4, T5)>
 #include "delegate_template.hxx"
 #undef INET_DELEGATE_NUM_ARGS
 
-#define INET_DELEGATE_NUM_ARGS	6 // Delegate<R (T1, T2, T3, T4, T5, T6)>
+#define INET_DELEGATE_NUM_ARGS	6 // delegate<R (T1, T2, T3, T4, T5, T6)>
 #include "delegate_template.hxx"
 #undef INET_DELEGATE_NUM_ARGS
 

@@ -1,6 +1,6 @@
 /**
  *  Version:     @(#)libinet/listener.cxx    0.0.2 23/05/2008
- *  Authors:     Hailong Xia <hlxxxx@gmail.com> 
+ *  Authors:     Hailong Xia <xhl_c@hotmail.com> 
  *  Brief  :     To implement INET::Client by boost::asio. you can 
  *               get boost:;asio from boost website.
  *

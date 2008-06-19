@@ -1,6 +1,6 @@
 /**
  *  Version:     @(#)libinet/service.cxx    0.0.2 24/05/2008
- *  Authors:     Hailong Xia <hlxxxx@gmail.com> 
+ *  Authors:     Hailong Xia <xhl_c@hotmail.com> 
  *  Brief  :     boost::asio::io_service wrapper class.  
  *
  *  This library is free software; you can redistribute it and/or modify it under 

@@ -25,14 +25,14 @@
 #include "message.hxx"
 
 #define INET_REGISTER_DEFAULT_MSG(handler, obj, func) \
-    (handler).register_default_handler(DEFAULT_MSG_HANDLER(obj, func))
+    (handler)->register_default_handler(DEFAULT_MSG_HANDLER(obj, func))
 
 #define INET_REGISTER_MSG(handler, type, obj, func) \
-    (handler).register_handler<type>(new inet::Delegate<bool (const type&)>(obj, func))
+    (handler)->register_handler<type>(new inet::delegate<bool (const type&)>(obj, func))
 
 namespace inet 
 {
-    typedef Delegate<bool (inet_uint16/*msg id*/, inet_uint32/*msg len*/, buffer&)> DEFAULT_MSG_HANDLER;
+    typedef delegate<bool (inet_uint16/*msg id*/, inet_uint32/*msg len*/, buffer&)> DEFAULT_MSG_HANDLER;
     template <inet_uint16 MaxMsgId = 64>
     class msg_handler
     {
@@ -58,17 +58,18 @@ namespace inet
         }
 
         template <typename MsgType>
-        void register_handler(Delegate<bool (const MsgType&)>* handler)
+        void register_handler(delegate<bool (const MsgType&)>* handler)
         {
             inet_int32 id = msg_id<MsgType >::_msg_id;
             assert(id >= 0 && id < MaxMsgId);
+            if (handlers_[id].func_) delete (handlers_[id].func_);
             handlers_[id].wrapper_ = &handler_wrapper<MsgType>; 
             handlers_[id].func_ = (void *)handler;
         }
 
         void register_default_handler(const DEFAULT_MSG_HANDLER& handler)
         {
-            default_handler_ = handler;
+            default_handler_ += handler;
         }
 
         template <class MsgType>
@@ -90,7 +91,7 @@ namespace inet
         {
             MsgType msg; 
             if (!unserialize(msg, istream)) return false;
-            return ((Delegate<bool (const MsgType&)>*)func)->operator () (msg);
+            return ((delegate<bool (const MsgType&)>*)func)->operator () (msg);
         }
 
         void on_received(inet::session* session, buffer& istream, buffer& ostream)
@@ -125,7 +126,7 @@ namespace inet
 
                 if (!handlers_[msghdr_.id_].wrapper_ || !handlers_[msghdr_.id_].func_)
                 {
-                    if (!default_handler_.IsEmpty())
+                    if (!default_handler_.empty())
                     {
                         (default_handler_)(msghdr_.id_, msghdr_.body_len_, istream); 
                     }

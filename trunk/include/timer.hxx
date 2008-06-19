@@ -26,7 +26,7 @@
 
 namespace inet
 {
-   typedef Delegate<void (void* /*args */)> TIMER_EVENT_CB;
+   typedef delegate<void (void* /*args */)> TIMER_EVENT_CB;
    class timer_impl;
    class timer
    {

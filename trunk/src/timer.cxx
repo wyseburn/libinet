@@ -1,6 +1,6 @@
 /**
  *  Version:     @(#)libinet/timer.cxx    0.0.1 19/06/2008
- *  Authors:     Hailong Xia <hlxxxx@gmail.com> 
+ *  Authors:     Hailong Xia <xhl_c@hotmail.com> 
  *  Brief  :      
  *
  *  This library is free software; you can redistribute it and/or modify it under 
@@ -98,7 +98,7 @@ void
 inet::timer::set(inet_uint32 duration, const TIMER_EVENT_CB& cb, void* args)
 {
     assert(impl_);
-    callback_ = cb;
+    if (!callback_.exist(cb)) callback_ = cb;
     args_ = args;
     impl_->set(duration);
 }
