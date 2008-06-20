@@ -21,6 +21,8 @@
 #define __LIBINET_UTIL_H__
 
 #include <cassert>
+#include <string>
+#include <iostream>
 
 #ifdef __cplusplus
 extern "C" {

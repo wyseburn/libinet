@@ -1,4 +1,3 @@
-#include <iostream>
 #include "listener.hxx"
 #include "msg_handler.hxx"
 #include "msg.hxx"

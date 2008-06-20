@@ -1,4 +1,3 @@
-#include <iostream>
 #include "buffer.hxx"
 
 void foo1()

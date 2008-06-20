@@ -1,5 +1,5 @@
 /**
- *  Version:     @(#)libinet/s11n.hxx    0.0.4 29/05/2008
+ *  Version:     @(#)libinet/s11n.hxx    0.1.2 29/05/2008
  *  Authors:     Hailong Xia <xhl_c@hotmail.com> 
  *  Brief  :     C++ object s11n implement 
  *
@@ -23,6 +23,10 @@
 #include "buffer.hxx"
 #include "typecheck.hxx"
 #include "byteorder.hxx"
+#include "blob.hxx"
+
+#define INET_FLOAT_PRECISION  1000000
+#define INET_DOUBLE_PRECISION 1000000000
 
 namespace inet
 {
@@ -45,15 +49,53 @@ namespace inet
         }
     };
 
+    /* Custom memory blob object*/
     template <class Type>
-    struct s11n_traits<Type, typename enableif<is_integer<Type >::value>::type>
+    struct s11n_traits<Type, typename enableif<is_blob<Type >::value>::type>
     {
-        static inet_uint32 s11n_size() { return sizeof(Type); }
-        static inet_uint32 s11n_size(const Type& instance) { return sizeof(instance); }
+        static inet_uint32 s11n_size(const Type& instance) 
+        { 
+            return sizeof(instance.len_) + instance.len_;
+        }
 
         static void s11n(const Type& instance, inet::buffer& buffer)
         {
-            buffer << byte_convert<Type>::hton(instance);
+            inet_uint32 len = instance.len_;
+#if !defined (_INET_BYTE_ORDER_NOT_CONVERT)
+            len = endian_reverse<inet_uint32>::convert(instance.len_);
+#endif
+            buffer << (inet_uint32) len;
+            buffer.write(instance.data_, instance.len_);
+        }
+
+        static bool uns11n(Type& instance, inet::buffer& buffer)
+        {
+            if (buffer.length() < sizeof(instance.len_) + instance.len_)
+                return false;
+            buffer >> instance.len_;
+#if !defined (_INET_BYTE_ORDER_NOT_CONVERT)
+             instance.len_ = endian_reverse<inet_uint32>::convert(instance.len_);
+#endif
+             buffer.read(instance.data_, instance.len_);
+            return true;
+        }
+    };
+
+    template <class Type>
+    struct s11n_traits<Type, typename enableif<is_integer<Type >::value>::type>
+    {
+        static inet_uint32 s11n_size(const Type& instance) 
+        { 
+            return sizeof(instance); 
+        }
+
+        static void s11n(const Type& instance, inet::buffer& buffer)
+        {
+#if defined (_INET_BYTE_ORDER_NOT_CONVERT)
+            buffer << instance;
+#else
+            buffer << endian_reverse<Type >::convert(instance);
+#endif
         }
 
         static bool uns11n(Type& instance, inet::buffer& buffer)
@@ -61,11 +103,105 @@ namespace inet
             if (buffer.length() < sizeof(Type))
                 return false;
             buffer >> instance;
-            instance = byte_convert<Type>::ntoh(instance);
+#if !defined (_INET_BYTE_ORDER_NOT_CONVERT)
+            instance = endian_reverse<Type >::convert(instance);
+#endif
             return true;
         }
     };
 
+    template <class Type>
+    struct s11n_traits<Type, typename enableif<is_float<Type >::value>::type>
+    {
+        static inet_uint32 s11n_size(const Type& instance) 
+        { 
+#if defined (_INET_BYTE_ORDER_NOT_CONVERT)
+            return sizeof(instance); 
+#else
+            return sizeof(instance) * 2;
+#endif
+        }
+
+        static void s11n(const Type& instance, inet::buffer& buffer)
+        {
+#if defined (_INET_BYTE_ORDER_NOT_CONVERT)
+            buffer << instance;
+#else
+            assert(sizeof(Type) == 4);
+            inet_uint32 integer = (inet_uint32)instance;
+            inet_uint32 decimal = (inet_uint32)((instance - integer) * INET_FLOAT_PRECISION);
+            buffer << endian_reverse<inet_uint32>::convert(integer);
+            buffer << endian_reverse<inet_uint32>::convert(decimal);
+#endif
+        }
+
+        static bool uns11n(Type& instance, inet::buffer& buffer)
+        {
+            if (buffer.length() < sizeof(Type))
+                return false;
+#if defined (_INET_BYTE_ORDER_NOT_CONVERT)
+            buffer >> instance;
+#else
+            assert(sizeof(Type) == 4);
+
+            inet_uint32 integer, decimal;
+            buffer >> integer;
+            integer = endian_reverse<inet_uint32>::convert(integer);
+            buffer >> decimal;
+            decimal = endian_reverse<inet_uint32>::convert(decimal);
+            instance = (Type)integer;
+            instance += ((Type)(decimal)) / INET_FLOAT_PRECISION;
+#endif
+            return true;
+        }
+    };
+
+    template <class Type>
+    struct s11n_traits<Type, typename enableif<is_double<Type >::value>::type>
+    {
+        static inet_uint32 s11n_size(const Type& instance) 
+        { 
+#if defined (_INET_BYTE_ORDER_NOT_CONVERT)
+            return sizeof(instance); 
+#else
+            return sizeof(instance) * 2;
+#endif
+        }
+
+        static void s11n(const Type& instance, inet::buffer& buffer)
+        {
+#if defined (_INET_BYTE_ORDER_NOT_CONVERT)
+            buffer << instance;
+#else
+            inet_uint64 integer = (inet_uint64)instance;
+            inet_uint64 decimal = (inet_uint64)((instance - integer) * INET_DOUBLE_PRECISION);
+            buffer << endian_reverse<inet_uint64>::convert(integer);
+            buffer << endian_reverse<inet_uint64>::convert(decimal);
+#endif
+        }
+
+        static bool uns11n(Type& instance, inet::buffer& buffer)
+        {
+            if (buffer.length() < sizeof(Type))
+                return false;
+#if defined (_INET_BYTE_ORDER_NOT_CONVERT)
+            buffer >> instance;
+#else
+            assert(sizeof(Type) == 8);
+
+            inet_uint64 integer, decimal;
+            buffer >> integer;
+            integer = endian_reverse<inet_uint64>::convert(integer);
+            buffer >> decimal;
+            decimal = endian_reverse<inet_uint64>::convert(decimal);
+            instance = (Type)integer;
+            instance += ((Type)(decimal)) / INET_DOUBLE_PRECISION;
+#endif
+            return true;
+        }
+    };
+
+    // Due to improve string copy performance, we special basic_string.
     template <class Type>
     struct s11n_traits<Type, typename enableif<is_std_basic_string<Type >::value>::type>
     {
@@ -74,13 +210,17 @@ namespace inet
         static inet_uint32 s11n_size(const Type& instance)
         {
             inet_uint32 size = sizeof(inet_uint32);
-            size += instance.size();
+            size += (inet_uint32)instance.size();
             return size;
         }
 
         static void s11n(const Type& instance, inet::buffer& buffer)
         {
-            buffer << byte_convert<inet_uint32>::hton(instance.size());
+#if defined (_INET_BYTE_ORDER_NOT_CONVERT)
+            buffer << (inet_uint32)instance.size();
+#else
+            buffer << endian_reverse<inet_uint32>::convert((inet_uint32)instance.size());
+#endif
             buffer << instance.c_str();
         }
 
@@ -91,9 +231,11 @@ namespace inet
 
             inet_uint32 size = 0;
             buffer >> size;
-            size = byte_convert<inet_uint32>::ntoh(size);
-
-            if (buffer.length() < size) return false;
+#if !defined (_INET_BYTE_ORDER_NOT_CONVERT)
+            size = endian_reverse<inet_uint32>::convert(size);
+#endif
+            if (buffer.length() < size) 
+                return false;
             buffer >> instance; // performance ???
             return true;
         }
@@ -125,14 +267,15 @@ namespace inet
     };
 
     template <class Type>
-    struct s11n_traits<Type, typename enableif<is_std_container<Type >::value>::type>
+    struct s11n_traits<Type, typename enableif<is_std_sequence_container<Type >::value 
+        || is_std_set_container<Type >::value>::type>
     {
         typedef typename Type::value_type elem_type;
         typedef typename Type::const_iterator iterator_type;
 
         static inet_uint32 s11n_size(const Type& instance)
         {
-            inet_uint32 size = s11n_traits<inet_uint32>::s11n_size(); 
+            inet_uint32 size = sizeof(inet_uint32);
             for (iterator_type it = instance.begin(); it != instance.end(); ++it)
                 size += s11n_traits<elem_type >::s11n_size(*it);
             return size;
@@ -140,7 +283,11 @@ namespace inet
 
         static void s11n(const Type& instance, inet::buffer& buffer)
         {
-            buffer << byte_convert<inet_uint32>::hton(instance.size());
+#if defined (_INET_BYTE_ORDER_NOT_CONVERT)
+            buffer << (inet_uint32)instance.size();
+#else
+            buffer << endian_reverse<inet_uint32>::convert((inet_uint32)instance.size());
+#endif
             for (iterator_type it = instance.begin(); it != instance.end(); ++it)
                 s11n_traits<elem_type >::s11n(*it, buffer);
         }
@@ -149,15 +296,60 @@ namespace inet
         {
             inet_uint32 size = 0;
             buffer >> size;
-            size = byte_convert<inet_uint32>::ntoh(size);
-
+#if !defined (_INET_BYTE_ORDER_NOT_CONVERT)
+            size = endian_reverse<inet_uint32>::convert(size);
+#endif
             for (; size; --size)
             {
                 elem_type elem;
                 if (!s11n_traits<elem_type >::uns11n(elem, buffer))
                     return false;
                 instance.insert(instance.end(), elem);
-                //instance.push_back(elem);
+            }
+            return true;
+        }
+    };
+
+    template <class Type>
+    struct s11n_traits<Type, typename enableif<is_std_map_container<Type >::value>::type>
+    {
+        typedef typename Type::key_type key_type;
+        typedef typename Type::mapped_type mapped_type;
+        typedef typename std::pair<key_type, mapped_type > elem_type;
+        typedef typename Type::const_iterator iterator_type;
+
+        static inet_uint32 s11n_size(const Type& instance)
+        {
+            inet_uint32 size = sizeof(inet_uint32);
+            for (iterator_type it = instance.begin(); it != instance.end(); ++it)
+                size += s11n_traits<elem_type >::s11n_size(*it);
+            return size;
+        }
+
+        static void s11n(const Type& instance, inet::buffer& buffer)
+        {
+#if defined (_BYTE_ORDER_NOT_CONVERT)
+            buffer << instance.size();
+#else
+            buffer << endian_reverse<inet_uint32>::convert((inet_uint32)instance.size());
+#endif
+            for (iterator_type it = instance.begin(); it != instance.end(); ++it)
+                s11n_traits<elem_type >::s11n(*it, buffer);
+        }
+
+        static bool uns11n(Type& instance, inet::buffer& buffer)
+        {
+            inet_uint32 size = 0;
+            buffer >> size;
+#if !defined (_BYTE_ORDER_NOT_CONVERT)
+            size = endian_reverse<inet_uint32>::convert(size);
+#endif
+            for (; size; --size)
+            {
+                elem_type elem;
+                if (!s11n_traits<elem_type >::uns11n(elem, buffer))
+                    return false;
+                instance.insert(instance.end(), elem);
             }
             return true;
         }
@@ -986,7 +1178,7 @@ bool __inet_uns11n(inet::buffer& buffer)                                        
 #define INET_S11N_TRAITS_12(classname, member1type, member1name, member2type, member2name,\
 member3type, member3name, member4type, member4name, member5type, member5name, member6type,\
 member6name, member7type, member7name, member8type, member8name, member9type, member9name,\
-member10type, member10name, member11type, member11name, member12type, member12Nmae)       \
+member10type, member10name, member11type, member11name, member12type, member12name)       \
 namespace inet                                                                            \
 {                                                                                         \
     template <>                                                                           \
@@ -1097,7 +1289,7 @@ bool __inet_uns11n(inet::buffer& buffer)                                        
 #define INET_S11N_TRAITS_13(classname, member1type, member1name, member2type, member2name,\
 member3type, member3name, member4type, member4name, member5type, member5name, member6type,\
 member6name, member7type, member7name, member8type, member8name, member9type, member9name,\
-member10type, member10name, member11type, member11name, member12type, member12Nmae,       \
+member10type, member10name, member11type, member11name, member12type, member12name,       \
 member13type, member13name)                                                               \
 namespace inet                                                                            \
 {                                                                                         \
@@ -1215,7 +1407,7 @@ bool __inet_uns11n(inet::buffer& buffer)                                        
 #define INET_S11N_TRAITS_14(classname, member1type, member1name, member2type, member2name,\
 member3type, member3name, member4type, member4name, member5type, member5name, member6type,\
 member6name, member7type, member7name, member8type, member8name, member9type, member9name,\
-member10type, member10name, member11type, member11name, member12type, member12Nmae,       \
+member10type, member10name, member11type, member11name, member12type, member12name,       \
 member13type, member13name, member14type, member14name)                                   \
 namespace inet                                                                            \
 {                                                                                         \

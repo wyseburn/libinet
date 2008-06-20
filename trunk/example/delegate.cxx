@@ -1,5 +1,5 @@
-#include <iostream>
 #include <cassert>
+#include <iostream>
 #include "delegate.hxx"
 
 static void static_func(const char* str)

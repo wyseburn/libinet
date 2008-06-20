@@ -1,5 +1,3 @@
-#include <iostream>
-#include "session.hxx"
 #include "msg_handler.hxx"
 #include "msg.hxx"
 

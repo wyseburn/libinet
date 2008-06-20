@@ -31,60 +31,68 @@
 namespace inet
 {
     template <typename Type> 
-    class byte_convert
+    class endian_reverse
     {
     public:
-        inline static Type hton(Type val) { return val; }
-        inline static Type ntoh(Type val) { return val; }
+        inline static Type convert(Type val) { return val; }
     };
 
     template <>
-    inline inet_int16 byte_convert<inet_int16>::hton(inet_int16 hs)
+    inline inet_int16 endian_reverse<inet_int16>::convert(inet_int16 input)
     {
-        return (inet_int16)htons((inet_uint16)hs);
+        return (inet_int16) ((input << 8) & 0xff00) | ((input >> 8) & 0x00ff);
     }
 
     template <>
-    inline inet_int16 byte_convert<inet_int16>::ntoh(inet_int16 ns)
+    inline inet_uint16 endian_reverse<inet_uint16>::convert(inet_uint16 input)
     {
-        return (inet_int16)ntohs((inet_uint16)ns);
+        return (inet_uint16) ((input << 8) & 0xff00) | ((input >> 8) & 0x00ff);
     }
 
     template <>
-    inline inet_uint16 byte_convert<inet_uint16>::hton(inet_uint16 hs)
+    inline inet_int32 endian_reverse<inet_int32>::convert(inet_int32 input)
     {
-        return (inet_uint16)htons(hs);
+        return (inet_int32) ((input << 24) & 0xff000000) | 
+                            ((input << 8 ) & 0x00ff0000) | 
+                            ((input >> 8 ) & 0x0000ff00) | 
+                            ((input >> 24) & 0x000000ff);
     }
 
     template <>
-    inline inet_uint16 byte_convert<inet_uint16>::ntoh(inet_uint16 ns)
+    inline inet_uint32 endian_reverse<inet_uint32>::convert(inet_uint32 input)
     {
-        return (inet_uint16)ntohs(ns);
+        return (inet_uint32) ((input << 24) & 0xff000000) | 
+                             ((input << 8 ) & 0x00ff0000) | 
+                             ((input >> 8 ) & 0x0000ff00) | 
+                             ((input >> 24) & 0x000000ff);
     }
 
     template <>
-    inline inet_int32 byte_convert<inet_int32>::hton(inet_int32 hl)
+    inline inet_int64 endian_reverse<inet_int64>::convert(inet_int64 input)
     {
-        return (inet_int32)htonl((inet_uint32)hl);
+        return (inet_int64) ((input << 56) & 0xff00000000000000ull) |
+                            ((input << 40) & 0x00ff000000000000ull) |
+                            ((input << 24) & 0x0000ff0000000000ull) |
+                            ((input << 8 ) & 0x000000ff00000000ull) |
+                            ((input >> 8 ) & 0x00000000ff000000ull) |
+                            ((input >> 24) & 0x0000000000ff0000ull) |
+                            ((input >> 40) & 0x000000000000ff00ull) |
+                            ((input >> 56) & 0x00000000000000ffull);
     }
 
     template <>
-    inline inet_int32 byte_convert<inet_int32>::ntoh(inet_int32 nl)
+    inline inet_uint64 endian_reverse<inet_uint64>::convert(inet_uint64 input)
     {
-        return (inet_int32)ntohl((inet_uint32)nl);
+        return (inet_uint64) ((input << 56) & 0xff00000000000000ull) |
+                             ((input << 40) & 0x00ff000000000000ull) |
+                             ((input << 24) & 0x0000ff0000000000ull) |
+                             ((input << 8 ) & 0x000000ff00000000ull) |
+                             ((input >> 8 ) & 0x00000000ff000000ull) |
+                             ((input >> 24) & 0x0000000000ff0000ull) |
+                             ((input >> 40) & 0x000000000000ff00ull) |
+                             ((input >> 56) & 0x00000000000000ffull);
     }
 
-    template <>
-    inline inet_uint32 byte_convert<inet_uint32>::hton(inet_uint32 hl)
-    {
-        return (inet_uint32)htonl(hl);
-    }
-
-    template <>
-    inline inet_uint32 byte_convert<inet_uint32>::ntoh(inet_uint32 nl)
-    {
-        return (inet_uint32)ntohl(nl);
-    }
 } // namesapce
                            
 #endif // #ifndef __LIBINET_BYTE_ORDER_H__

@@ -151,6 +151,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\include\blob.hxx"
+				>
+			</File>
+			<File
 				RelativePath="..\include\buffer.hxx"
 				>
 			</File>
@@ -188,6 +192,10 @@
 			</File>
 			<File
 				RelativePath="..\include\msg_handler.hxx"
+				>
+			</File>
+			<File
+				RelativePath="..\include\network.hxx"
 				>
 			</File>
 			<File

@@ -39,7 +39,7 @@ namespace inet
             : pointer_(0), maxmark_(MaxTimeoutTime / (Precision + 1)) // begin with 0  
             , cache_size_(cache_size), cache_len_(0)
         {
-            for (inet_int32 i = 0; i <= maxmark_; ++i)
+            for (inet_uint32 i = 0; i <= maxmark_; ++i)
                 INET_LIST_INIT(&handlers_[i]);
             INET_LIST_INIT(&cache_);
   
@@ -57,7 +57,7 @@ namespace inet
         ~timeout_service() 
         {
             struct handler* handler;
-            for (inet_int32 i = 0; i < maxmark_; ++i)
+            for (inet_uint32 i = 0; i < maxmark_; ++i)
             {
                 while (handler = INET_LIST_FIRST(&handlers_[i]))
                 {
@@ -124,7 +124,7 @@ namespace inet
             if (steps >= maxmark_)
             {
                 benchmark_ = curr_time;
-                for (inet_int32 i = 0; i < steps % maxmark_ && i < pointer_; ++i)
+                for (inet_uint32 i = 0; i < steps % maxmark_ && i < pointer_; ++i)
                 {
                     struct handler* handler;
                     while (handler = INET_LIST_FIRST(&handlers_[i]))

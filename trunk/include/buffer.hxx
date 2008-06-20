@@ -20,11 +20,8 @@
 #ifndef __LIBINET_BUFFER_H__
 #define __LIBINET_BUFFER_H__
 
-#include <string>
-#include <cassert>
-
-#include "util.hxx"
 #include "compat.hxx"
+#include "util.hxx"
 
 namespace inet 
 {
@@ -489,9 +486,8 @@ namespace inet
 
         buffer& operator >> (std::string& value)
         {
-            value.clear();
-            buffer::node* node = INET_DLIST_FIRST(&data_);
-            while (node)
+            //value.clear();
+            while (INET_DLIST_FIRST(&data_))
             {
                 inet_int8 c = read<inet_int8>();
                 if (c == 0) break;
@@ -516,9 +512,8 @@ namespace inet
  
         buffer& operator >> (std::wstring& value)
         {
-            value.clear();
-            buffer::node* node = INET_DLIST_FIRST(&data_);
-            while (node)
+            //value.clear();
+            while (INET_DLIST_FIRST(&data_))
             {
                 inet_uint16 c = read<inet_uint16>();
                 if (c == 0) break;
@@ -526,7 +521,6 @@ namespace inet
             }
             return *this;
         }
-
     }; 
 } // namespace
 

@@ -1,4 +1,3 @@
-#include <iostream>
 #include "timer.hxx"
 
 static void func(void* args)

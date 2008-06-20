@@ -1,4 +1,3 @@
-#include <iostream>
 #include "session.hxx"
 
 #if defined (_WIN32)

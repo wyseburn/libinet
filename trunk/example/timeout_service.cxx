@@ -1,4 +1,3 @@
-#include <iostream>
 #include "timeout_service.hxx"
 
 #if defined (_WIN32)

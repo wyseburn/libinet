@@ -1,4 +1,3 @@
-#include <iostream>
 #include "listener.hxx"
 
 class client : public inet::session
