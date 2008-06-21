@@ -1,7 +1,7 @@
 /**
- *  Version:     @(#)libinet/s11n.hxx    0.1.2 29/05/2008
+ *  Version:     @(#)libinet/serialize.hxx    0.1.10 29/05/2008
  *  Authors:     Hailong Xia <xhl_c@hotmail.com> 
- *  Brief  :     C++ object s11n implement 
+ *  Brief  :     C++ object serialize implement 
  *
  *  This library is free software; you can redistribute it and/or modify it under 
  *  the terms of the GNU Lesser General Public License as published by the Free 
@@ -46,38 +46,6 @@ namespace inet
         static bool uns11n(Type& instance, inet::buffer& buffer)
         {
             return instance.__inet_uns11n(buffer);
-        }
-    };
-
-    /* Custom memory blob object*/
-    template <class Type>
-    struct s11n_traits<Type, typename enableif<is_blob<Type >::value>::type>
-    {
-        static inet_uint32 s11n_size(const Type& instance) 
-        { 
-            return sizeof(instance.len_) + instance.len_;
-        }
-
-        static void s11n(const Type& instance, inet::buffer& buffer)
-        {
-            inet_uint32 len = instance.len_;
-#if !defined (_INET_BYTE_ORDER_NOT_CONVERT)
-            len = endian_reverse<inet_uint32>::convert(instance.len_);
-#endif
-            buffer << (inet_uint32) len;
-            buffer.write(instance.data_, instance.len_);
-        }
-
-        static bool uns11n(Type& instance, inet::buffer& buffer)
-        {
-            if (buffer.length() < sizeof(instance.len_) + instance.len_)
-                return false;
-            buffer >> instance.len_;
-#if !defined (_INET_BYTE_ORDER_NOT_CONVERT)
-             instance.len_ = endian_reverse<inet_uint32>::convert(instance.len_);
-#endif
-             buffer.read(instance.data_, instance.len_);
-            return true;
         }
     };
 
@@ -137,13 +105,14 @@ namespace inet
 
         static bool uns11n(Type& instance, inet::buffer& buffer)
         {
+#if defined (_INET_BYTE_ORDER_NOT_CONVERT)
             if (buffer.length() < sizeof(Type))
                 return false;
-#if defined (_INET_BYTE_ORDER_NOT_CONVERT)
             buffer >> instance;
 #else
             assert(sizeof(Type) == 4);
-
+            if (buffer.length() < sizeof(Type) * 2)
+                return false;
             inet_uint32 integer, decimal;
             buffer >> integer;
             integer = endian_reverse<inet_uint32>::convert(integer);
@@ -182,13 +151,14 @@ namespace inet
 
         static bool uns11n(Type& instance, inet::buffer& buffer)
         {
+#if defined (_INET_BYTE_ORDER_NOT_CONVERT)
             if (buffer.length() < sizeof(Type))
                 return false;
-#if defined (_INET_BYTE_ORDER_NOT_CONVERT)
             buffer >> instance;
 #else
             assert(sizeof(Type) == 8);
-
+            if (buffer.length() < sizeof(Type) * 2)
+                return false;
             inet_uint64 integer, decimal;
             buffer >> integer;
             integer = endian_reverse<inet_uint64>::convert(integer);
@@ -197,6 +167,40 @@ namespace inet
             instance = (Type)integer;
             instance += ((Type)(decimal)) / INET_DOUBLE_PRECISION;
 #endif
+            return true;
+        }
+    };
+
+    /* Custom memory blob object*/
+    template <class Type>
+    struct s11n_traits<Type, typename enableif<is_blob<Type >::value>::type>
+    {
+        static inet_uint32 s11n_size(const Type& instance) 
+        { 
+            return sizeof(instance.len_) + instance.len_;
+        }
+
+        static void s11n(const Type& instance, inet::buffer& buffer)
+        {
+            inet_uint32 len = instance.len_;
+#if !defined (_INET_BYTE_ORDER_NOT_CONVERT)
+            len = endian_reverse<inet_uint32>::convert(instance.len_);
+#endif
+            buffer << (inet_uint32) len;
+            buffer.write(instance.data_, instance.len_);
+        }
+
+        static bool uns11n(Type& instance, inet::buffer& buffer)
+        {
+            if (buffer.length() < sizeof(instance.len_))
+                return false;
+            buffer >> instance.len_;
+#if !defined (_INET_BYTE_ORDER_NOT_CONVERT)
+             instance.len_ = endian_reverse<inet_uint32>::convert(instance.len_);
+#endif
+             if (buffer.length() < instance.len_)
+                 return false;
+             buffer.read(instance.data_, instance.len_);
             return true;
         }
     };
@@ -221,7 +225,7 @@ namespace inet
 #else
             buffer << endian_reverse<inet_uint32>::convert((inet_uint32)instance.size());
 #endif
-            buffer << instance.c_str();
+            buffer.write((inet_int8 const *)instance.c_str(), (inet_uint32)instance.size() * sizeof(Type));
         }
 
         static bool uns11n(Type& instance, inet::buffer& buffer)
@@ -229,14 +233,25 @@ namespace inet
             if (buffer.length() < sizeof(inet_uint32))
                 return false;
 
-            inet_uint32 size = 0;
+            inet_uint32 size;
             buffer >> size;
 #if !defined (_INET_BYTE_ORDER_NOT_CONVERT)
             size = endian_reverse<inet_uint32>::convert(size);
 #endif
             if (buffer.length() < size) 
                 return false;
-            buffer >> instance; // performance ???
+
+            elem_type tmpbuf[2048];
+            inet_uint32 readlen;
+            instance.clear();
+            while (size > 0) 
+            {
+                readlen = size < 2046 ? size : 2046; 
+                buffer.read(tmpbuf, readlen * sizeof(Type)); 
+                tmpbuf[readlen] = 0;
+                instance += tmpbuf;
+                size -= readlen;
+            }
             return true;
         }
     };
@@ -294,11 +309,14 @@ namespace inet
 
         static bool uns11n(Type& instance, inet::buffer& buffer)
         {
-            inet_uint32 size = 0;
+            if (buffer.length() < sizeof(inet_uint32))
+                return false;
+            inet_uint32 size;
             buffer >> size;
 #if !defined (_INET_BYTE_ORDER_NOT_CONVERT)
             size = endian_reverse<inet_uint32>::convert(size);
 #endif
+            instance.clear();
             for (; size; --size)
             {
                 elem_type elem;
@@ -339,11 +357,14 @@ namespace inet
 
         static bool uns11n(Type& instance, inet::buffer& buffer)
         {
-            inet_uint32 size = 0;
+            if (buffer.length() < sizeof(inet_uint32))
+                return false;
+            inet_uint32 size;
             buffer >> size;
 #if !defined (_BYTE_ORDER_NOT_CONVERT)
             size = endian_reverse<inet_uint32>::convert(size);
 #endif
+            instance.clear();
             for (; size; --size)
             {
                 elem_type elem;
