@@ -57,6 +57,7 @@ namespace inet
 
         friend class listener_impl;
 
+        void reset();
         inet::service& get_service();
         void* get_socket(); // return boost::ip::tcp::socket pointer
         inet_int32 get_socket_fd() const;

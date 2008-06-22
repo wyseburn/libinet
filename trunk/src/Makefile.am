@@ -24,4 +24,4 @@ AM_CXXFLAGS = -I../include -I $(BOOST_INCLUDE)
 
 noinst_LIBRARIES = libinet.a
 
-libinet_a_SOURCES = service.cxx session.cxx listener.cxx timer.cxx zstream.cxx
+libinet_a_SOURCES = service.cxx session.cxx listener.cxx timer.cxx 

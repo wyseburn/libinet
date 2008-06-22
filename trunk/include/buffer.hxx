@@ -127,6 +127,16 @@ namespace inet
             return length;
         }
 
+        void clear()
+        {
+            buffer::node* node;
+            while (node = INET_DLIST_FIRST(&data_))
+            {
+                INET_DLIST_REMOVE(&data_, node, entries_);
+                dealloc_node(node);
+            }
+        }
+
         void drain(inet_uint32 nbytes)
         {
             buffer::node* node = INET_DLIST_FIRST(&data_);

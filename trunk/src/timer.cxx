@@ -33,7 +33,7 @@ namespace inet
     public:
         timer_impl(inet::timer* wrapper, inet::service& service, bool reset_flag) 
             : wrapper_(wrapper), service_(service), timer_(*(io_service *)service.get())
-            , reset_flag_(reset_flag), strand_(*(io_service *)service.get())
+            , reset_flag_(reset_flag)
         {
         }
 
@@ -47,7 +47,7 @@ namespace inet
         {
             duration_ = duration;
             timer_.expires_from_now(deadline_timer::duration_type(0, 0, 0, duration_ * 1000));
-            timer_.async_wait(strand_.wrap(boost::bind(&timer_impl::handler, this, _1)));
+            timer_.async_wait(boost::bind(&timer_impl::handler, this, _1));
         }
 
         void cancel()
@@ -61,7 +61,7 @@ namespace inet
             if (reset_flag_)
             {
                 timer_.expires_from_now(deadline_timer::duration_type(0, 0, 0, duration_ * 1000));
-                timer_.async_wait(strand_.wrap(boost::bind(&timer_impl::handler, this, _1)));
+                timer_.async_wait(boost::bind(&timer_impl::handler, this, _1));
             }
         }
 
@@ -71,8 +71,6 @@ namespace inet
         deadline_timer timer_;
         inet_uint32 duration_;
         bool reset_flag_;
-        boost::asio::strand strand_;
-
     };
 }
 

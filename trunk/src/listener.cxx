@@ -35,7 +35,6 @@ namespace inet
         listener_impl(listener* wrapper, inet::service& service, inet_uint16 port, const inet_int8* ip)
             : wrapper_(wrapper), service_(service)
             , acceptor_(*(io_service *)service.get(), ip::tcp::endpoint(ip::tcp::v4(), port))
-            , strand_(*(io_service *)service.get())
         {}
 
         ~listener_impl() {}
@@ -46,12 +45,12 @@ namespace inet
         {
             assert(session->get_transport() == inet::tcp);
             acceptor_.async_accept(*(ip::tcp::socket *)session->get_socket(), 
-                strand_.wrap(boost::bind(&listener_impl::on_accepted, this, session, asio::placeholders::error)));
+                boost::bind(&listener_impl::on_accepted, this, session, asio::placeholders::error));
         }
 
         void on_accepted(inet::session* session, const error_code& error)
         {
-            if (!error)
+            if (error.value() == 0)
             {
                 session->async_receive();
                 wrapper_->on_accepted_(session, session->recv_buffer_, session->send_buffer_);
@@ -65,7 +64,6 @@ namespace inet
         inet::listener* wrapper_;
         inet::service& service_;
         ip::tcp::acceptor acceptor_;
-        boost::asio::strand strand_;
     };
 
 } // namespace

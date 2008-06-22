@@ -157,9 +157,9 @@ namespace inet
             struct handler* handler;
             if (cache_len_ <= 0) 
             {
-                handler = (struct handler *)malloc(sizeof(struct handler));
+                handler = new struct handler();
                 assert(handler);
-                return new (handler) struct handler();
+                return handler;
             }
 				
             handler = INET_LIST_FIRST(&cache_);

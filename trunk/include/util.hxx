@@ -28,6 +28,27 @@
 extern "C" {
 #endif
 
+#define INET_FREELIST_HEAD(name, size)                                          \
+struct name {                                                                   \
+        unsigned fl_size;                                                       \
+        unsigned fl_count;                                                      \
+        void*    fl_nodes[size];                                                \
+}
+
+#define INET_FREELIST_INIT(head, size)                                          \
+do {                                                                            \
+        (head)->fl_size = size; (head)->fl_count = 0;                           \
+} while (0)
+        
+#define INET_FREELIST_PUSH(head, node)                                          \
+        ((head)->fl_count == (head)->fl_size ? 0 :                              \
+        ((head)->fl_nodes[(head)->fl_count++] = node))
+
+#define INET_FREELIST_POP(head)                                                 \
+        ((head)->fl_count == 0 ? NULL : (head)->fl_nodes[--(head)->fl_count])
+
+#define INET_FREELIST_EMPTY(head) ((head)->fl_count == 0)
+
 /**
  * Single List Define
  */

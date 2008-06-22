@@ -51,7 +51,7 @@ public:
 #if defined (_WIN32)
         Sleep(1000);
 #elif defined (__linux__) || defined (__FreeBSD__)
-        usleep(1000);
+        usleep(1000000);
 #endif
         echoseq_++;
 

@@ -34,19 +34,26 @@ namespace inet
     public:
         session_impl(inet::session* wrapper, inet::service& service, inet::transport transport) 
             : wrapper_(wrapper), service_(service), transport_(transport)
-            , pending_recv_request_count_(0), pending_send_request_count_(0)
-            , strand_(*(io_service *)service.get())
         {
-            if (transport == inet::tcp)
-            {
-                socket_.reset(new ip::tcp::socket(*(io_service *)service_.get())); 
-                assert(socket_.get());
-            }
+            reset();
         }
 
         virtual ~session_impl() 
         {
             if (socket_.get()) socket_->close(); 
+        }
+
+        void reset()
+        {
+            if (transport_ == inet::tcp)
+            {
+                socket_.reset(new ip::tcp::socket(*(io_service *)service_.get())); 
+                assert(socket_.get());
+            }
+            wrapper_->send_buffer_.clear();
+            wrapper_->recv_buffer_.clear();
+            pending_recv_request_count_ = 0;
+            pending_send_request_count_ = 0;
         }
 
         inet::service& get_service() { return service_; }
@@ -65,10 +72,23 @@ namespace inet
                 ip::tcp::resolver::iterator last;
                 assert(last != endpoint);
 
-                socket_->async_connect(*endpoint, strand_.wrap(boost::bind(&session_impl::on_connected,
-                    this, remote, port, asio::placeholders::error)));
+                socket_->async_connect(*endpoint, boost::bind(&session_impl::on_connected,
+                    this, remote, port, asio::placeholders::error));
             }
             return true;
+        }
+
+        void async_receive()
+        {
+            if (transport_ == inet::tcp)
+            {
+                inet::buffer::node* node = wrapper_->recv_buffer_.alloc_node();
+                socket_->async_receive(asio::buffer((char *)node + sizeof(inet::buffer::node), 
+                    wrapper_->recv_buffer_.node_data_size_),
+                    boost::bind(&session_impl::on_received, this,
+                    asio::placeholders::bytes_transferred, node, asio::placeholders::error));
+                pending_recv_request_count_++;
+            }
         }
 
         void async_send()
@@ -80,7 +100,7 @@ namespace inet
                 {
                     asio::async_write(*(ip::tcp::socket *)socket_.get(), 
                         asio::buffer((char *)node + sizeof(inet::buffer::node), node->len_),
-                        strand_.wrap(boost::bind(&session_impl::on_sent, this, node, asio::placeholders::error)));
+                        boost::bind(&session_impl::on_sent, this, node, asio::placeholders::error));
                     pending_send_request_count_++;
                 }
             }
@@ -100,7 +120,7 @@ namespace inet
 
         void on_connected(const std::string& remote, inet_uint16 port, const error_code& error)
         {
-            if (!error)
+            if (error.value() == 0)
             {
                 async_receive();
                 wrapper_->on_connected_(wrapper_, wrapper_->recv_buffer_, wrapper_->send_buffer_);
@@ -110,7 +130,7 @@ namespace inet
                 wrapper_->on_connect_failed_(wrapper_, wrapper_->recv_buffer_, wrapper_->send_buffer_);
             }
             else
-            {
+            { 
                 wrapper_->on_connect_broken_(wrapper_, wrapper_->recv_buffer_, wrapper_->send_buffer_);
             }
         }
@@ -122,8 +142,10 @@ namespace inet
             wrapper_->recv_buffer_.push_node(node);
             if (error.value() != 0)
             {
-                if (!pending_recv_request_count_ && !pending_send_request_count_)
+                if (pending_recv_request_count_ == 0 && pending_send_request_count_ == 0)
+                {
                     wrapper_->on_connect_broken_(wrapper_, wrapper_->recv_buffer_, wrapper_->send_buffer_);
+                }
             }
             else
             {
@@ -137,7 +159,7 @@ namespace inet
             pending_send_request_count_--;
             if (error.value() != 0)
             {
-                if (!pending_recv_request_count_ && !pending_send_request_count_)
+                if (pending_recv_request_count_ == 0 && pending_send_request_count_ == 0)
                 {
                     wrapper_->on_connect_broken_(wrapper_, wrapper_->recv_buffer_, wrapper_->send_buffer_);
                 }
@@ -153,19 +175,6 @@ namespace inet
             wrapper_->send_buffer_.dealloc_node(node);
         } 
 
-        void async_receive()
-        {
-            if (transport_ == inet::tcp)
-            {
-                inet::buffer::node* node = wrapper_->recv_buffer_.alloc_node();
-                socket_->async_receive(asio::buffer((char *)node + sizeof(inet::buffer::node), 
-                    wrapper_->recv_buffer_.node_data_size_),
-                    strand_.wrap(boost::bind(&session_impl::on_received, this,
-                    asio::placeholders::bytes_transferred, node, asio::placeholders::error)));
-                pending_recv_request_count_++;
-            }
-        }
-
     private:
         inet::session* wrapper_;
         std::auto_ptr<ip::tcp::socket> socket_; 
@@ -173,7 +182,6 @@ namespace inet
         inet::transport transport_;
         inet_uint32 pending_recv_request_count_;
         inet_uint32 pending_send_request_count_;
-        boost::asio::strand strand_;
     };
 }
 
@@ -187,6 +195,13 @@ inet::session::session(inet::service& service, inet::transport type)
 inet::session::~session()
 {
     delete impl_;
+}
+
+void
+inet::session::reset()
+{
+    assert(impl_);
+    return impl_->reset();
 }
 
 inet::service& 
