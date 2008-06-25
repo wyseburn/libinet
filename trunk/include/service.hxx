@@ -29,7 +29,7 @@ namespace inet
     {
     public:
         service();
-        ~service();
+        virtual ~service();
 
         void* get();
         inet_uint32 poll();

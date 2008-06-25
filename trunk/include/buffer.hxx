@@ -116,6 +116,18 @@ namespace inet
             return node;
         }
 
+        void print() /* string output */
+        {
+            buffer::node* node;
+            INET_DLIST_FOREACH(node, &data_, entries_)
+            {
+                if (node->len_ + node->off_ < node_data_size_) 
+                    *((char *)node + sizeof(buffer::node) + node->off_ + node->len_) = 0;
+                std::cout << (char *)node + sizeof(buffer::node) + node->off_;
+            }
+            std::cout << std::endl;
+        }
+
         inet_uint32 length() const
         {
             inet_uint32 length = 0;

@@ -54,7 +54,7 @@ namespace inet
             }
         }
 
-        ~timeout_service() 
+        virtual ~timeout_service() 
         {
             struct handler* handler;
             for (inet_uint32 i = 0; i < maxmark_; ++i)

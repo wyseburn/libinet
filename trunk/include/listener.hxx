@@ -34,9 +34,11 @@ namespace inet
     {
     public:
         listener(inet::service& service, inet_uint16 port, const inet_int8* ip = 0);
-        ~listener();
+        virtual ~listener();
+
+        friend class listener_impl;
         
-        inet::service& get_service();
+        inet::service& get_service() { return service_; }
         void async_accept(inet::session* session);
         void close();
 
@@ -44,6 +46,7 @@ namespace inet
        
     private:
         listener_impl* impl_;
+        inet::service& service_;
     };
 } // namespace
 

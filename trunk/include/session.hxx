@@ -55,17 +55,19 @@ namespace inet
         session(inet::service& service, inet::transport transport);
         virtual ~session();
 
+        friend class session_impl;
         friend class listener_impl;
 
         void reset();
-        inet::service& get_service();
+        inet::service& get_service() { return service_; }
+        inet::transport get_transport() const { return transport_; }
         void* get_socket(); // return boost::ip::tcp::socket pointer
         inet_int32 get_socket_fd() const;
-        inet::transport get_transport() const;
 
         void close();
         bool async_connect(const inet_int8* remote, inet_uint16 port);
         void async_send();
+        void async_receive();
         void async_send(inet::buffer& buffer);
         void async_send(const void* data, inet_uint32 len);
         inet_uint32 read(void* data, inet_uint32 len) {return recv_buffer_.read(data, len);}
@@ -80,7 +82,8 @@ namespace inet
         inet::buffer recv_buffer_;
 
     private:
-        void async_receive();
+        inet::service& service_;
+        inet::transport transport_;
         session_impl* impl_; 
     };
 }

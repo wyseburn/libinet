@@ -32,7 +32,7 @@ namespace inet
    {
    public:
        timer(inet::service& service, bool reset_flsg = true);
-       ~timer();
+       virtual ~timer();
 
        inet::service& get_service();
        void set(inet_uint32 duration/*millisecond*/, const TIMER_EVENT_CB& cb, void* args);
