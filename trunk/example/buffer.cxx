@@ -101,6 +101,7 @@ void foo5()
 
     buf << "test for stream buffer";
 
+    buf.print();
     std::cout << "buf len: " << buf.length() << std::endl;
 
     inet::buffer::node* node = buf.pop_node();
@@ -111,7 +112,6 @@ void foo5()
 
     buf.dealloc_node(node);
 
-    
     node = buf.pop_node();
    
     std::cout << "execute buf.pop_node() operation" << std::endl;

@@ -44,7 +44,7 @@ public:
     {
         unsigned int id; 
         std::string str;
-     
+
         istream >> id; 
         istream >> str;
         std::cout << id << " " << str.c_str() << std::endl;

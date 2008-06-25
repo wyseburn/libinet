@@ -16,7 +16,7 @@ public:
         INET_REGISTER_ACCEPTED(this, this, &client_manager::on_accepted);
     }
 
-    ~client_manager() {}
+    virtual ~client_manager() {}
 
     void accept()
     {
