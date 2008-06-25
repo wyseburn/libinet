@@ -26,7 +26,7 @@ public:
  
     void on_accepted(inet::session* session, inet::buffer& istream, inet::buffer& ostream)
     {
-        std::cout << "The connection establish with client" << std::endl;
+        //std::cout << "The connection establish with client" << std::endl;
         accept();
         INET_REGISTER_RECEIVED(session, this, &client_manager::on_received);
         INET_REGISTER_CONNECT_BROKEN(session, this, &client_manager::on_disconnected);
@@ -34,14 +34,14 @@ public:
 
     void on_received(inet::session* session, inet::buffer& istream, inet::buffer& ostream)
     {
-        std::cout << "Receive a echo request from client." << std::endl;
+        //std::cout << "Receive a echo request from client." << std::endl;
         istream >> ostream;
         session->async_send();
     }
 
     void on_disconnected(inet::session* session, inet::buffer& istream, inet::buffer& ostream)
     {
-        std::cout << "The connection was closed by peer" << std::endl;
+        //std::cout << "The connection was closed by peer" << std::endl;
         delete session;
     }
 private:

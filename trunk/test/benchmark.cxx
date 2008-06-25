@@ -17,6 +17,7 @@
 #include "timer.hxx"
 #include "session.hxx"
 #include "timeout_service.hxx"
+#include "getopt.hxx"
 
 using namespace inet;
 
@@ -108,10 +109,10 @@ parse_options(int argc, char *argv[])
         }
     }
 
-   if (optind < argc) {
+    if (optind < argc) {
         printf("Unexpected argument %s\n", argv[optind]);
         return -1;
-   }
+    }
 
    return 0;
 }

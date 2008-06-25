@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="libinet_static"
-	ProjectGUID="{8C1924AC-E3B9-4571-832E-F7EE51772866}"
-	RootNamespace="libinet_static"
+	Name="benchmark"
+	ProjectGUID="{8924D2B1-D86C-49B5-86AE-F2CCFBF5717A}"
+	RootNamespace="benchmark"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -19,7 +19,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			CharacterSet="1"
 			>
 			<Tool
@@ -39,10 +39,9 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				UseUnicodeResponseFiles="false"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(BOOST_INCLUDE)&quot;;../include/;&quot;../contrib/zlib123-dll/include/&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
+				AdditionalIncludeDirectories="&quot;$(BOOST_INCLUDE)&quot;;../include/"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -61,10 +60,19 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
+				Name="VCLinkerTool"
+				AdditionalDependencies="ws2_32.lib"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="$(BOOST_LIB)"
+				GenerateDebugInformation="true"
+				SubSystem="1"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -76,6 +84,12 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -83,7 +97,7 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -104,14 +118,13 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="&quot;$(BOOST_INCLUDE)&quot;;../include/"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="0"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -123,10 +136,21 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
+				Name="VCLinkerTool"
+				AdditionalDependencies="ws2_32.lib"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="$(BOOST_LIB)"
+				GenerateDebugInformation="true"
+				SubSystem="1"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -136,6 +160,12 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -151,99 +181,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\include\blob.hxx"
+				RelativePath="..\test\benchmark.cxx"
 				>
 			</File>
 			<File
-				RelativePath="..\include\buffer.hxx"
+				RelativePath="..\test\getopt.cxx"
 				>
 			</File>
 			<File
-				RelativePath="..\include\byteorder.hxx"
-				>
-			</File>
-			<File
-				RelativePath="..\include\compat.hxx"
-				>
-			</File>
-			<File
-				RelativePath="..\include\config.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\delegate.hxx"
-				>
-			</File>
-			<File
-				RelativePath="..\include\delegate_template.hxx"
-				>
-			</File>
-			<File
-				RelativePath="..\src\listener.cxx"
-				>
-			</File>
-			<File
-				RelativePath="..\include\listener.hxx"
-				>
-			</File>
-			<File
-				RelativePath="..\include\message.hxx"
-				>
-			</File>
-			<File
-				RelativePath="..\include\msg_handler.hxx"
-				>
-			</File>
-			<File
-				RelativePath="..\include\network.hxx"
-				>
-			</File>
-			<File
-				RelativePath="..\include\serialize.hxx"
-				>
-			</File>
-			<File
-				RelativePath="..\src\service.cxx"
-				>
-			</File>
-			<File
-				RelativePath="..\include\service.hxx"
-				>
-			</File>
-			<File
-				RelativePath="..\src\session.cxx"
-				>
-			</File>
-			<File
-				RelativePath="..\include\session.hxx"
-				>
-			</File>
-			<File
-				RelativePath="..\include\timeout_service.hxx"
-				>
-			</File>
-			<File
-				RelativePath="..\src\timer.cxx"
-				>
-			</File>
-			<File
-				RelativePath="..\include\timer.hxx"
-				>
-			</File>
-			<File
-				RelativePath="..\include\typecheck.hxx"
-				>
-			</File>
-			<File
-				RelativePath="..\include\util.hxx"
-				>
-			</File>
-			<File
-				RelativePath="..\src\zstream.cxx"
-				>
-			</File>
-			<File
-				RelativePath="..\include\zstream.hxx"
+				RelativePath="..\test\getopt.hxx"
 				>
 			</File>
 		</Filter>

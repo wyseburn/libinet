@@ -2,6 +2,7 @@
 # include <stdio.h>
 # include <string.h>
 # define _next_char(str)  (char)(*(str+1)) 
+# include "getopt.hxx"
 
 char *optarg = NULL; 
 int optind = 1, opterr = 1;  
