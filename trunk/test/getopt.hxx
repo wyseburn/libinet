@@ -1,5 +1,5 @@
-#ifndef __GETOPT_H
-#define __GETOPT_H
+#ifndef __LIBINET_GETOPT_H__
+#define __LIBINET_GETOPT_H__
 
 #ifndef _WIN32
 # include <unistd.h>
@@ -16,4 +16,4 @@ int getopt(int argc, char *argv[], char *opstring);
 #endif
 #endif
 
-#endif /* __GETOPT_H */
+#endif /* __LIBINET_GETOPT_H__ */
