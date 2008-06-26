@@ -63,6 +63,8 @@ namespace inet
         inet::transport get_transport() const { return transport_; }
         void* get_socket(); // return boost::ip::tcp::socket pointer
         inet_int32 get_socket_fd() const;
+        const std::string& get_remote_ip() const { return remote_ip_; }
+        inet_uint16 get_remote_port() const { return remote_port_; }
 
         void close();
         bool async_connect(const inet_int8* remote, inet_uint16 port);
@@ -85,6 +87,8 @@ namespace inet
         inet::service& service_;
         inet::transport transport_;
         session_impl* impl_; 
+        std::string remote_ip_;
+        inet_uint16 remote_port_;
     };
 }
 

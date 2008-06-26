@@ -238,14 +238,6 @@
 				RelativePath="..\include\util.hxx"
 				>
 			</File>
-			<File
-				RelativePath="..\src\zstream.cxx"
-				>
-			</File>
-			<File
-				RelativePath="..\include\zstream.hxx"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>

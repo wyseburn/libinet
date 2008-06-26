@@ -230,6 +230,8 @@ bool
 inet::session::async_connect(const inet_int8* remote, inet_uint16 port)
 {
     assert(impl_);
+    remote_ip_ = remote;
+    remote_port_ = port;
     return impl_->async_connect(remote, port);
 }
 

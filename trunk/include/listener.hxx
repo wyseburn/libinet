@@ -36,6 +36,7 @@ namespace inet
         listener(inet::service& service, inet_uint16 port, const inet_int8* ip = 0);
         virtual ~listener();
 
+        friend class session;
         friend class listener_impl;
         
         inet::service& get_service() { return service_; }

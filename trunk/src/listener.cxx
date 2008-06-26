@@ -50,6 +50,10 @@ namespace inet
         {
             if (error.value() == 0)
             {
+                ip::tcp::socket* sock = (ip::tcp::socket *)session->get_socket();
+                ip::tcp::endpoint endpoint = sock->remote_endpoint();
+                session->remote_ip_ = endpoint.address().to_string();
+                session->remote_port_ = endpoint.port();
                 //socket_base::linger option(false, 0);
                 //((ip::tcp::socket *)session->get_socket())->set_option(option);
                 session->async_receive();

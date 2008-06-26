@@ -25,6 +25,8 @@ public:
     void on_connected(inet::session*, inet::buffer& istream, inet::buffer& ostream)
     {
         std::cout << "Connect to server success" << std::endl;
+        std::cout << "Remote Ip: " << get_remote_ip().c_str() 
+                  << " Remote Port: " << get_remote_port() << std::endl;
         ostream << echoseq_; 
         ostream << "tcp echo test";
         async_send();

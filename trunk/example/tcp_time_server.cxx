@@ -58,6 +58,8 @@ public:
     void on_accepted(inet::session* session, inet::buffer& istream, inet::buffer& ostream)
     {
         std::cout << "The connection establish with client" << std::endl;
+        std::cout << "From Ip: " << session->get_remote_ip().c_str() 
+                  << " From Port: " << session->get_remote_port() << std::endl;
         accept();
         INET_REGISTER_CONNECT_BROKEN(session, this, &client_manager::on_disconnected);
     }
