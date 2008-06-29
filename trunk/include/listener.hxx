@@ -26,6 +26,9 @@
 #define INET_REGISTER_ACCEPTED(listener, obj, func) \
     (listener)->on_accepted_ += std::make_pair(obj, func)
 
+#define INET_DEREGISTER_ACCEPTED(listener, obj, func) \
+    (listener)->on_accepted_ -= std::make_pair(obj, func)
+
 namespace inet
 {
     typedef delegate<void (session*, buffer&/*istream*/, buffer&/*ostream*/)> ACCEPT_EVENT;

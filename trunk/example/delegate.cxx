@@ -45,6 +45,9 @@ int main(int argc, char* argv[])
    a("a");
    std::cout << std::endl;
 
+   a -= &static_func;
+   assert(!a.exist(&static_func));
+
    // Create delegate b that references an instance function:
    object obj(0);
    inet::delegate<void (const char*)> b(&obj, &object::func);

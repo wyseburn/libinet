@@ -28,17 +28,32 @@
 #define INET_REGISTER_CONNECTED(session, obj, func) \
     (session)->on_connected_ += std::make_pair(obj, func)
 
+#define INET_DEREGISTER_CONNECTED(session, obj, func) \
+    (session)->on_connected_ -= std::make_pair(obj, func)
+
 #define INET_REGISTER_CONNECT_FAILED(session, obj, func) \
     (session)->on_connect_failed_ += std::make_pair(obj, func)
+
+#define INET_DEREGISTER_CONNECT_FAILED(session, obj, func) \
+    (session)->on_connect_failed_ -= std::make_pair(obj, func)
 
 #define INET_REGISTER_CONNECT_BROKEN(session, obj, func) \
     (session)->on_connect_broken_ += std::make_pair(obj, func)
 
+#define INET_DEREGISTER_CONNECT_BROKEN(session, obj, func) \
+    (session)->on_connect_broken_ -= std::make_pair(obj, func)
+
 #define INET_REGISTER_RECEIVED(session, obj, func) \
     (session)->on_received_ += std::make_pair(obj, func)
 
+#define INET_DEREGISTER_RECEIVED(session, obj, func) \
+    (session)->on_received_ -= std::make_pair(obj, func)
+
 #define INET_REGISTER_SENT(session, obj, func) \
     (session)->on_sent_ += std::make_pair(obj, func)
+
+#define INET_DEREGISTER_SENT(session, obj, func) \
+    (session)->on_sent_ -= std::make_pair(obj, func)
 
 namespace inet
 {

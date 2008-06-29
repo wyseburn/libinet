@@ -31,6 +31,8 @@
 #define INET_REGISTER_MSG(handler, type, obj, func) \
     (handler)->register_handler<type>(new inet::delegate<bool (const type&)>(obj, func))
 
+#define INET_DEREGISTER_MSG(handler, type) (handler)->register_handler<type>()
+
 namespace inet 
 {
     typedef delegate<bool (inet_uint16/*msg id*/, inet_uint32/*msg len*/, buffer&)> DEFAULT_MSG_HANDLER;
@@ -58,6 +60,11 @@ namespace inet
             INET_REGISTER_RECEIVED(session, this, &msg_handler::on_received);
         }
 
+        void register_default_handler(const DEFAULT_MSG_HANDLER& handler)
+        {
+            default_handler_ += handler;
+        }
+
         template <typename MsgType>
         void register_handler(delegate<bool (const MsgType&)>* handler)
         {
@@ -68,9 +75,14 @@ namespace inet
             handlers_[id].func_ = (void *)handler;
         }
 
-        void register_default_handler(const DEFAULT_MSG_HANDLER& handler)
+        template <typename MsgType>
+        void deregister_handler()
         {
-            default_handler_ += handler;
+            inet_int32 id = msg_id<MsgType >::_msg_id;
+            assert(id >= 0 && id < MaxMsgId);
+            if (handlers_[id].func_) 
+                delete (handlers_[id].func_);
+            handlers_[id].func_ = NULL;
         }
 
         template <class MsgType>
