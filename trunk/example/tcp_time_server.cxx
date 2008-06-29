@@ -66,7 +66,7 @@ public:
 
     void on_disconnected(inet::session* session, inet::buffer& istream, inet::buffer& ostream)
     {
-        std::cout << "The connection was closed by peer." << std::endl;
+        std::cout << "The connection was closed by peer, errno: " << get_last_error() << std::endl;
         delete session;
     }
 private:

@@ -37,7 +37,15 @@ namespace inet
             , acceptor_(*(io_service *)service.get(), ip::tcp::endpoint(ip::tcp::v4(), port))
         {}
 
-        virtual ~listener_impl() {}
+        virtual ~listener_impl() 
+        {
+            this->close();
+        }
+
+        void close() 
+        { 
+            acceptor_.close();
+        }
 
         void async_accept(inet::session* session)
         {
@@ -57,10 +65,15 @@ namespace inet
                 //socket_base::linger option(false, 0);
                 //((ip::tcp::socket *)session->get_socket())->set_option(option);
                 session->async_receive();
+                //if (!on_accept_.empty())
                 wrapper_->on_accepted_(session, session->recv_buffer_, session->send_buffer_);
             } 
             else
             {
+                wrapper_->errno_ = INET_ERROR_ACCEPT;
+                this->close();
+                if (!wrapper_->on_accepted_error_.empty()) 
+                    wrapper_->on_accepted_error_();
                 std::cout << "Accecpt error" << std::endl;
             }
         }
@@ -73,7 +86,7 @@ namespace inet
 } // namespace
 
 inet::listener::listener(inet::service& service, inet_uint16 port, const inet_int8* ip)
-    : service_(service)
+    : service_(service), errno_(0)
 {
     impl_ = new listener_impl(this, service, port, ip);
 }
@@ -94,5 +107,5 @@ void
 inet::listener::close()
 {
     assert(impl_);
-    //impl_->close();
+    impl_->close();
 }

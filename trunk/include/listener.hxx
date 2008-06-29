@@ -29,6 +29,7 @@
 namespace inet
 {
     typedef delegate<void (session*, buffer&/*istream*/, buffer&/*ostream*/)> ACCEPT_EVENT;
+    typedef delegate<void ()> ACCEPT_ERROR_EVENT;
     class listener_impl;
     class listener
     {
@@ -40,10 +41,13 @@ namespace inet
         friend class listener_impl;
         
         inet::service& get_service() { return service_; }
+        inet_uint32 get_last_error() const { return errno_; }
         void async_accept(inet::session* session);
         void close();
 
+        inet_uint32  errno_;
         ACCEPT_EVENT on_accepted_;
+        ACCEPT_ERROR_EVENT on_accepted_error_;
        
     private:
         listener_impl* impl_;

@@ -23,6 +23,7 @@
 #include "delegate.hxx"
 #include "session.hxx"
 #include "message.hxx"
+#include "errno.hxx"
 
 #define INET_REGISTER_DEFAULT_MSG(handler, obj, func) \
     (handler)->register_default_handler(DEFAULT_MSG_HANDLER(obj, func))
@@ -106,12 +107,14 @@ namespace inet
                     if (!unserialize(msghdr_, istream))
                     {
                         std::cout << "Failed to unserialized for message header." << std::endl;
+                        session->errno_ = INET_ERROR_S11N;
                         session->close();
                     }
 
                     if (msghdr_.id_ < 0 || msghdr_.id_ > MaxMsgId)
                     {
                         std::cout << "Invalid message id." << std::endl;
+                        session->errno_ = INET_ERROR_MSG_ID;
                         session->close();
                     }
                 }
@@ -133,12 +136,17 @@ namespace inet
                     else
                     {
                         std::cout << "Don't match this message." << std::endl;
+                        session->errno_ = INET_ERROR_MSG_HANDLER;
                         session->close();
                     }
                 }
                 else 
                 {
-                    handlers_[msghdr_.id_].wrapper_(handlers_[msghdr_.id_].func_, istream);
+                    if (!handlers_[msghdr_.id_].wrapper_(handlers_[msghdr_.id_].func_, istream))
+                    {
+                        session->errno_ = INET_ERROR_S11N;
+                        session->close();
+                    }
                 }
             }
         }

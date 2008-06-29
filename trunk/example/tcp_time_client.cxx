@@ -33,12 +33,12 @@ public:
 
     void on_connect_failed(inet::session*, inet::buffer& istream, inet::buffer& ostream)
     {
-        std::cout << "Failed to connect server" << std::endl;
+        std::cout << "Failed to connect server, errno: " << get_last_error() << std::endl;
     }
 
     void on_connect_broken(inet::session*, inet::buffer& istream, inet::buffer& ostream)
     {
-        std::cout << "Connect broken" << std::endl;
+        std::cout << "Connect broken, errno: " << get_last_error() << std::endl;
     }
 
     bool on_get_time_res(const get_time_res& res)

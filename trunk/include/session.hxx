@@ -23,7 +23,7 @@
 #include "service.hxx"
 #include "delegate.hxx"
 #include "buffer.hxx"
-
+#include "errno.hxx"
 
 #define INET_REGISTER_CONNECTED(session, obj, func) \
     (session)->on_connected_ += std::make_pair(obj, func)
@@ -65,6 +65,7 @@ namespace inet
         inet_int32 get_socket_fd() const;
         const std::string& get_remote_ip() const { return remote_ip_; }
         inet_uint16 get_remote_port() const { return remote_port_; }
+        inet_uint32 get_last_error() const { return errno_; }
 
         void close();
         bool async_connect(const inet_int8* remote, inet_uint16 port);
@@ -80,6 +81,7 @@ namespace inet
         SEND_EVENT_CB on_sent_;
         RECV_EVENT_CB on_received_;
 
+        inet_uint32  errno_;
         inet::buffer send_buffer_;
         inet::buffer recv_buffer_;
 

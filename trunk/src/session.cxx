@@ -124,10 +124,14 @@ namespace inet
             }
             else if (error.value() > 10054)
             {
+                wrapper_->errno_ = INET_ERROR_CONNECT;
+                this->close();
                 wrapper_->on_connect_failed_(wrapper_, wrapper_->recv_buffer_, wrapper_->send_buffer_);
             }
             else
             { 
+                wrapper_->errno_ = INET_ERROR_CONNECT;
+                this->close();
                 wrapper_->on_connect_broken_(wrapper_, wrapper_->recv_buffer_, wrapper_->send_buffer_);
             }
         }
@@ -186,7 +190,8 @@ namespace inet
 }
 
 inet::session::session(inet::service& service, inet::transport type)
-    :service_(service), transport_(type), send_buffer_(8000, 4), recv_buffer_(8000, 4)
+    : service_(service), transport_(type), send_buffer_(8000, 4) 
+    , recv_buffer_(8000, 4), errno_(0)
 {
     impl_ = new session_impl(this);
     assert(impl_);
