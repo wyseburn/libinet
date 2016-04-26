@@ -24,11 +24,11 @@ namespace IGame
 
         _UInt32 m_NodeDataSize;
         IGAME_DLIST_HEAD(NodeQue, Node) m_Data;
-        _UInt32 m_CacheSize;
-        _UInt32 m_CacheLen;
+        _Int32 m_CacheSize;
+        _Int32 m_CacheLen;
         IGAME_DLIST_HEAD(NodeCacheQue, Node) m_Cache;
 		
-        StreamBuffer(_UInt32 nodeDataSize = 4076, _UInt32 cacheSize = 5) 
+        StreamBuffer(_UInt32 nodeDataSize = 4076, _Int32 cacheSize = 5) 
             : m_NodeDataSize(nodeDataSize), m_CacheSize(cacheSize), m_CacheLen(0)
         {
             IGAME_DLIST_INIT(&m_Data);
